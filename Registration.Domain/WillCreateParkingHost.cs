@@ -6,9 +6,9 @@ using Registration.Interface;
 
 namespace Registration.Domain
 {
-    public class WillCreateParkingHost : IBehavior<CreateParkingHost, RegistrationWorld>
+    public class WillCreateParkingHost : IBehavior<RegistrationWorld>
     {
-        public Response<RegistrationWorld> handle(Request<CreateParkingHost, RegistrationWorld> request)
+        public Response<RegistrationWorld> handle(Request<RegistrationWorld> request)
         {
             var errors = new HashSet<ITrigger>();
 

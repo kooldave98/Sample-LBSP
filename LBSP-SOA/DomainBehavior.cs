@@ -2,17 +2,17 @@
 
 namespace LbspSOA
 {
-    public interface IBehavior<T, W> where T : ITrigger where W : IWorld
+    public interface IBehavior<W> where W : IWorld
     {
-        Response<W> handle(Request<T, W> request);
+        Response<W> handle(Request<W> request);
     }
 
-    public sealed class Request<T, W> where T : ITrigger where W : IWorld
+    public sealed class Request<W> where W : IWorld
     {
         public W world;
-        public T trigger;
+        public dynamic trigger;
 
-        public Request(W world, T trigger)
+        public Request(W world, dynamic trigger)
         {
             this.world = world;
             this.trigger = trigger;

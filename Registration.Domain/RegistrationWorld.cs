@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CodeStructures;
 using LbspSOA;
 
@@ -14,6 +15,11 @@ namespace Registration.Domain
         {
             this.hosts = Guard.IsNotNull(hosts, nameof(hosts));
             this.guests = Guard.IsNotNull(guests, nameof(guests));
+        }
+
+        public static RegistrationWorld seed_world()
+        {
+            return new RegistrationWorld(Enumerable.Empty<ParkingHost>(), Enumerable.Empty<ParkingGuest>());
         }
     }
 

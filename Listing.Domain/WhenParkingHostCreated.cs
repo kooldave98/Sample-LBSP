@@ -1,12 +1,11 @@
 ﻿using System;
 using LbspSOA;
-using Registration.Interface;
 
 namespace Listing.Domain
 {
-    public class WhenParkingHostCreated : IBehavior<ParkingHostCreated, ListingWorld>
+    public class WhenParkingHostCreated : IBehavior<ListingWorld>
     {
-        public Response<ListingWorld> handle(Request<ParkingHostCreated, ListingWorld> request)
+        public Response<ListingWorld> handle(Request<ListingWorld> request)
         {
             throw new NotImplementedException();
         }
