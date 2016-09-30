@@ -17,7 +17,11 @@ namespace Registration.Service
 
             var service = new LbspService<RegistrationWorld>(request_queue, response_queue, RegistrationWorld.seed_world());
 
-            var request_handler = new RequestHandler<RegistrationWorld>(request_queue, response_queue, new GESEventStore(nameof(RegistrationWorld)), new Router());
+            var request_handler = 
+                new RequestHandler<RegistrationWorld>(request_queue, 
+                                                    response_queue, 
+                                                    new GESEventStore(nameof(RegistrationWorld)), 
+                                                    new Router());
 
             service.replay(request_handler.get_history());
 

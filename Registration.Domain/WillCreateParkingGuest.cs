@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using CodeStructures;
 using LbspSOA;
@@ -10,16 +11,18 @@ namespace Registration.Domain
     {
         public Response<RegistrationWorld> handle(Request<RegistrationWorld> request)
         {
+            var trigger = new CreateParkingGuest((Guid)request.trigger.guest_id, (string)request.trigger.username);
+
             var errors = new HashSet<ITrigger>();
 
-            if(request.world.guests.Any(g=>g.guest_id == request.trigger.guest_id))
+            if(request.world.guests.Any(g=>g.guest_id == trigger.guest_id))
             {
-                errors.Add(new ParkingGuestIDTaken(request.trigger.guest_id));
+                errors.Add(new ParkingGuestIDTaken(trigger.guest_id));
             }
 
-            if (request.world.guests.Any(g => g.username == request.trigger.username))
+            if (request.world.guests.Any(g => g.username == trigger.username))
             {
-                errors.Add(new ParkingGuestUsernameTaken(request.trigger.username));
+                errors.Add(new ParkingGuestUsernameTaken(trigger.username));
             }
 
             if (errors.Any())
@@ -27,7 +30,7 @@ namespace Registration.Domain
                 return new Response<RegistrationWorld>(request.world, errors);
             }
 
-            var new_guest = new ParkingGuest(request.trigger.guest_id, request.trigger.username);
+            var new_guest = new ParkingGuest(trigger.guest_id, trigger.username);
 
             var new_world = new RegistrationWorld(request.world.hosts, request.world.guests.Union(new_guest.ToEnumerable()));
 
