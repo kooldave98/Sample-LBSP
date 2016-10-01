@@ -11,30 +11,44 @@ namespace Registration.Domain
     {
         public Response<RegistrationWorld> handle(Request<RegistrationWorld> request)
         {
-            var trigger = new CreateParkingGuest((Guid)request.trigger.guest_id, (string)request.trigger.username);
+            return
+            (CreateParkingGuest
+                .from_dynamic(request.trigger) as IMaybe<CreateParkingGuest>)
+                .Match(
+                trigger =>
+                {
+                    var errors = new HashSet<ITrigger>();
 
-            var errors = new HashSet<ITrigger>();
+                    if (request.world.guests.Any(g => g.guest_id == trigger.guest_id))
+                    {
+                        errors.Add(new ParkingGuestIDTaken(trigger.guest_id));
+                    }
 
-            if(request.world.guests.Any(g=>g.guest_id == trigger.guest_id))
-            {
-                errors.Add(new ParkingGuestIDTaken(trigger.guest_id));
-            }
+                    if (request.world.guests.Any(g => g.username == trigger.username))
+                    {
+                        errors.Add(new ParkingGuestUsernameTaken(trigger.username));
+                    }
 
-            if (request.world.guests.Any(g => g.username == trigger.username))
-            {
-                errors.Add(new ParkingGuestUsernameTaken(trigger.username));
-            }
+                    if (errors.Any())
+                    {
+                        return new Response<RegistrationWorld>(request.world, errors);
+                    }
 
-            if (errors.Any())
-            {
-                return new Response<RegistrationWorld>(request.world, errors);
-            }
+                    var new_guest = new ParkingGuest(trigger.guest_id, trigger.username);
 
-            var new_guest = new ParkingGuest(trigger.guest_id, trigger.username);
+                    var new_world = new RegistrationWorld(request.world.hosts, request.world.guests.Union(new_guest.ToEnumerable()));
 
-            var new_world = new RegistrationWorld(request.world.hosts, request.world.guests.Union(new_guest.ToEnumerable()));
+                    return new Response<RegistrationWorld>(new_world, new ParkingGuestCreated(new_guest.guest_id, new_guest.username).ToEnumerable());
+                },
+                () => type_init_error(request));
 
-            return new Response<RegistrationWorld>(new_world, new ParkingGuestCreated(new_guest.guest_id, new_guest.username).ToEnumerable());
+            
         }
+
+        public Response<RegistrationWorld> type_init_error(Request<RegistrationWorld> request)
+        {
+            return new Response<RegistrationWorld>(request.world, Enumerable.Empty<ITrigger>());
+        }
+
     }
 }

@@ -14,6 +14,17 @@ namespace Registration.Interface
             this.guest_id = Guard.IsNotNull(guest_id, nameof(guest_id));
             this.username = Guard.IsNotNull(username, nameof(username));
         }
+
+        public static IMaybe<CreateParkingGuest> from_dynamic(dynamic source)
+        {
+            return
+            Safely.Do(() =>
+                    new CreateParkingGuest(
+                        (Guid)source.guest_id,
+                        (string)source.username))
+                        ;
+        }
+
     }
 
     public class ParkingGuestUsernameTaken : IErrorTrigger
