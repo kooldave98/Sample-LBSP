@@ -135,10 +135,11 @@ namespace LbspSOA
         //if (saved-last-processed-event-number <= count(published-events))
         private int get_last_position(string stream_name)
         {
-            return
+            var resolved_event =
                 read_log(current_domain_stream, ReadDirection.Backward, 2)
-                    .First(e => e.Event.EventType == $"{LoggedEventPointer}-{stream_name}")
-                    .Event.EventNumber;
+                    .FirstOrDefault(e => e.Event.EventType == $"{LoggedEventPointer}-{stream_name}");
+
+            return resolved_event.Event == null ? 0 : resolved_event.Event.EventNumber;            
         }
 
 
