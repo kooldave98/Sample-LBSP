@@ -9,6 +9,5 @@ namespace Query.Service
         public virtual string Username { get; set; }
         public virtual string Email { get; set; }
 
-
     }
 }

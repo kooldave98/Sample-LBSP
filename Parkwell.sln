@@ -41,8 +41,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Query", "Query", "{FEC70F1F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Query.Service", "Query.Service\Query.Service.csproj", "{CE05DE95-0E76-4469-BC8A-2B52FF3CE82B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gateway", "Gateway\Gateway.csproj", "{810F8CF3-1677-4702-9613-84724294DDE2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -101,10 +99,6 @@ Global
 		{CE05DE95-0E76-4469-BC8A-2B52FF3CE82B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE05DE95-0E76-4469-BC8A-2B52FF3CE82B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE05DE95-0E76-4469-BC8A-2B52FF3CE82B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{810F8CF3-1677-4702-9613-84724294DDE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{810F8CF3-1677-4702-9613-84724294DDE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{810F8CF3-1677-4702-9613-84724294DDE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{810F8CF3-1677-4702-9613-84724294DDE2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
