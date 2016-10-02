@@ -20,19 +20,19 @@ namespace LbspSOA
                     .Select(e => resolve_pointer(Encoding.UTF8.GetString(e.Event.Data)));
         }
 
-        public void Subscribe(string stream_name, string event_type, Action<RawEvent> on_message_received)
+        public void Subscribe(string stream_name, Action<RawEvent> on_message_received)
         {
             var settings = new CatchUpSubscriptionSettings(50, 10, true, true);
 
             connection.SubscribeToStreamFrom(stream_name, get_last_position(stream_name), settings,
                 (e, s) =>
                 {
-                    if (s.Event.EventType == event_type)
+                    if (!s.Event.EventType.Contains(LoggedEventPointer))
                     {
                         on_message_received(new RawEvent(s.Event.EventId,
                                                             s.Event.Data,
                                                             s.Event.Metadata,
-                                                            event_type,
+                                                            s.Event.EventType,
                                                             stream_name,
                                                             s.Event.EventNumber));
                     }
@@ -42,7 +42,7 @@ namespace LbspSOA
                 {
                     Console.WriteLine($"Subscription to {stream_name} dropped .. reconnecting");
 
-                    Subscribe(stream_name, event_type, on_message_received);
+                    Subscribe(stream_name, on_message_received);
                 });
         }
 

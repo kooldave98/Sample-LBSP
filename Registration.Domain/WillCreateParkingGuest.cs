@@ -46,7 +46,7 @@ namespace Registration.Domain
 
         private static Response<RegistrationWorld> type_init_error(Request<RegistrationWorld> request)
         {
-            return new Response<RegistrationWorld>(request.world, Enumerable.Empty<ITrigger>());
+            return new Response<RegistrationWorld>(request.world, new TriggerInitialisationError<CreateParkingGuest>().ToEnumerable());
         }
 
     }

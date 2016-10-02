@@ -27,7 +27,7 @@ namespace Registration.Service
 
             service.start();
 
-            request_handler.start_listening();
+            request_handler.start_listening("Gateway");
 
             Console.ReadLine();
 

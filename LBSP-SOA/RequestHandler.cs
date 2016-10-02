@@ -34,9 +34,13 @@ namespace LbspSOA
 
         private ConcurrentDictionary<Guid, RawEvent> raw_event_requests = new ConcurrentDictionary<Guid, RawEvent>();
 
-        public void start_listening()
+        public void start_listening(params string[] streams)
         {
-            event_store.Subscribe("PlannedSupply", "ShiftCalendarPublished", handle);
+            foreach (var stream in streams)
+            {
+                event_store.Subscribe(stream, handle);
+            }
+            
 
             Task.Run(() => {
                 foreach (var response in responses.GetConsumingEnumerable())
