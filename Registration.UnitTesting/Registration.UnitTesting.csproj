@@ -55,6 +55,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="CreateParkingHostMust.cs" />
     <Compile Include="CreateParkingGuestMust.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
