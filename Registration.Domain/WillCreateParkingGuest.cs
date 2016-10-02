@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using CodeStructures;
 using LbspSOA;
@@ -45,7 +44,7 @@ namespace Registration.Domain
             
         }
 
-        public Response<RegistrationWorld> type_init_error(Request<RegistrationWorld> request)
+        private static Response<RegistrationWorld> type_init_error(Request<RegistrationWorld> request)
         {
             return new Response<RegistrationWorld>(request.world, Enumerable.Empty<ITrigger>());
         }

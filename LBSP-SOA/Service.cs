@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CodeStructures;
 
 namespace LbspSOA
 {
@@ -39,7 +40,18 @@ namespace LbspSOA
         {
             var pattern_request = new Request<W>(world, request.memento.as_attributes);
 
-            var response = request.handler(pattern_request);
+            Response<W> response;
+
+            try
+            {
+                response = request.handler(pattern_request);
+                //This is very important
+                world = response.world;
+            }
+            catch(Exception e)
+            {
+                response = new Response<W>(world, new UnknownError().ToEnumerable());
+            }
 
             return new RawResponse<W>(request, response);
         }

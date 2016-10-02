@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using CodeStructures;
 using EventStore.ClientAPI;
 using Newtonsoft.Json;
 
@@ -45,21 +46,34 @@ namespace LbspSOA
                 });
         }
 
-        public void Publish(RawEvent payload, RawEventPointer log_payload = null)
+        public void PublishResponse(IEnumerable<RawEvent> raw_events, RawEventPointer log_payload = null)
         {
-            var events = new List<EventData>() { new EventData(payload.id, payload.type, true, payload.data, payload.metadata) };
+            var events = raw_events.Select(payload => new EventData(payload.id, payload.type, true, payload.data, payload.metadata));
 
             if (log_payload != null)
             {
-                events.Add(new EventData(Guid.NewGuid(),
+                events =
+                events.Union(new EventData(Guid.NewGuid(),
                                             $"{LoggedEventPointer}-{log_payload.stream_name}", //Todo: wrap this in a constant
                                             true,
-                                            Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(log_payload)), null));
+                                            Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(log_payload)), null).ToEnumerable());
             }
 
 
             connection
                 .AppendToStreamAsync(current_domain_stream,
+                                    ExpectedVersion.Any,
+                                    events)
+                .Wait();
+        }
+
+        public void PublishErrors(IEnumerable<RawEvent> raw_events, string origin_stream)
+        {
+            var events = raw_events.Select(payload => new EventData(payload.id, payload.type, true, payload.data, payload.metadata));
+
+
+            connection
+                .AppendToStreamAsync($"{origin_stream}-Errors",
                                     ExpectedVersion.Any,
                                     events)
                 .Wait();

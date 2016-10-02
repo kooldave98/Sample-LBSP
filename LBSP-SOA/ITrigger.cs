@@ -8,13 +8,18 @@ namespace LbspSOA
     {
     }
 
-
-
     public interface IErrorTrigger : ITrigger
     {
         
     }
 
+    public class TriggerInitialisationError<T> : IErrorTrigger where T : ITrigger
+    {
+    }
+
+    public class UnknownError : IErrorTrigger
+    {
+    }
 
     public static class TriggerExtensions
     {

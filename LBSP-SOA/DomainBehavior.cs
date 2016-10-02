@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace LbspSOA
 {
@@ -23,6 +25,18 @@ namespace LbspSOA
     {
         public W world;
         public IEnumerable<ITrigger> events;
+
+        public void match(Action<IEnumerable<ITrigger>> is_success, Action<IEnumerable<IErrorTrigger>> is_error)
+        {
+            if(events.has_errors())
+            {
+                is_error(events.OfType<IErrorTrigger>());
+
+                return;
+            }
+
+            is_success(events);
+        }
 
         public Response(W world, IEnumerable<ITrigger> events)
         {

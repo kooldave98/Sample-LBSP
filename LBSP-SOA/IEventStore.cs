@@ -6,7 +6,8 @@ namespace LbspSOA
     public interface IEventStore
     {
         IEnumerable<RawEvent> get_history();
-        void Publish(RawEvent payload, RawEventPointer log_payload = null);
+        void PublishResponse(IEnumerable<RawEvent> events, RawEventPointer log_payload = null);
+        void PublishErrors(IEnumerable<RawEvent> raw_events, string origin_stream);
         void Subscribe(string stream_name, string event_type, Action<RawEvent> on_message_received);
         void unsubscribe_all();
     }
@@ -18,6 +19,9 @@ namespace LbspSOA
         public readonly byte[] data;
         public readonly byte[] metadata;
         public readonly string type;
+
+        //Todo: need to split RawEvent into NewRawEvent
+        //and ReceivedRawEvent, ReceivedRawEvent will have the fields below only, as they are not relevant to NewRawEvent
         public readonly string origin_stream;
         public readonly int position_in_stream;
 

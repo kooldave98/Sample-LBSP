@@ -24,7 +24,6 @@ namespace Registration.Interface
                         (string)source.username))
                         ;
         }
-
     }
 
     public class ParkingGuestUsernameTaken : IErrorTrigger

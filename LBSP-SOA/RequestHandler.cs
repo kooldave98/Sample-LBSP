@@ -41,18 +41,43 @@ namespace LbspSOA
             Task.Run(() => {
                 foreach (var response in responses.GetConsumingEnumerable())
                 {
+                    response
+                        .core_response
+                        .match(
+                            is_success: events => {
 
-                    var payload = new RawEvent(response.raw_request.id
-                                            , Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response.core_response.events))
-                                            , null
-                                            , "PatternPeriodsChanged");
+                                var payload = 
+                                    events.Select(ev=> new RawEvent(Guid.NewGuid()
+                                            , Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(ev))
+                                            , Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new { parent_id = response.raw_request.id }))//Every event has a pointer to its parent event
+                                            , ev.GetType().Name));
 
-                    RawEvent input_raw_event;
+                                RawEvent input_raw_event;
 
-                    if (raw_event_requests.TryRemove(response.raw_request.id, out input_raw_event))
-                    {
-                        event_store.Publish(payload, input_raw_event.ToPointer());
-                    }
+                                if (raw_event_requests.TryRemove(response.raw_request.id, out input_raw_event))
+                                {
+                                    //Potential data inconsistencies between removing above, and publishing below
+                                    event_store.PublishResponse(payload, input_raw_event.ToPointer());
+                                }
+
+                            },
+                            is_error: errors => {
+
+                                var payload =
+                                    errors.Select(ev => new RawEvent(Guid.NewGuid()
+                                            , Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(ev))
+                                            , Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new { parent_id = response.raw_request.id }))//Every event has a pointer to its parent event
+                                            , ev.GetType().Name));
+
+                                RawEvent input_raw_event;
+
+                                if (raw_event_requests.TryRemove(response.raw_request.id, out input_raw_event))
+                                {
+                                    //Potential data inconsistencies between removing above, and publishing below
+                                    event_store.PublishErrors(payload, input_raw_event.origin_stream);
+                                }
+                            }
+                        );                    
                 }
 
             });
