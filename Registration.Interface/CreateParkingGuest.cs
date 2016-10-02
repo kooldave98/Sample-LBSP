@@ -45,4 +45,14 @@ namespace Registration.Interface
             this.guest_id = Guard.IsNotNull(guest_id, nameof(guest_id));
         }
     }
+
+    public class ParkingGuestEmailTaken : IErrorTrigger
+    {
+        public readonly string email;
+
+        public ParkingGuestEmailTaken(string email)
+        {
+            this.email = Guard.IsNotNull(email, nameof(email));
+        }
+    }
 }

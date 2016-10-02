@@ -10,28 +10,58 @@ namespace Registration.Domain
     {
         public Response<RegistrationWorld> handle(Request<RegistrationWorld> request)
         {
-            var errors = new HashSet<ITrigger>();
+            return
+            (CreateParkingHost
+                .from_dynamic(request.trigger) as IMaybe<CreateParkingHost>)
+                .Match(
+                    trigger => {
+                        //has value
 
-            if (request.world.hosts.Any(h => h.host_id == request.trigger.host_id))
-            {
-                errors.Add(new ParkingGuestIDTaken(request.trigger.host_id));
-            }
+                        var world = request.world;
 
-            if (request.world.hosts.Any(h => h.username == request.trigger.username))
-            {
-                errors.Add(new ParkingGuestUsernameTaken(request.trigger.username));
-            }
+                        var errors = new HashSet<ITrigger>();
 
-            if (errors.Any())
-            {
-                return new Response<RegistrationWorld>(request.world, errors);
-            }
+                        //validation 1: prevent duplicate id
+                        if (world.hosts.Any(h => h.host_id == trigger.host_id))
+                        {
+                            errors.Add(new ParkingGuestIDTaken(trigger.host_id));
+                        }
 
-            var new_host = new ParkingHost(request.trigger.host_id, request.trigger.username);
+                        //validation 2: prevent duplicate names
+                        if (world.hosts.Any(h => h.username == trigger.username))
+                        {
+                            errors.Add(new ParkingGuestUsernameTaken(trigger.username));
+                        }
 
-            var new_world = new RegistrationWorld(request.world.hosts.Union(new_host.ToEnumerable()), request.world.guests);
+                        //validation 2: prevent duplicate names
+                        if (world.hosts.Any(h => h.email == trigger.email))
+                        {
+                            errors.Add(new ParkingGuestUsernameTaken(trigger.username));
+                        }
 
-            return new Response<RegistrationWorld>(new_world, new ParkingHostCreated(new_host.host_id, new_host.username).ToEnumerable());
+                        if (errors.Any())
+                        {
+                            return new Response<RegistrationWorld>(world, errors);
+                        }
+                        //after this point everything is good to go
+
+                        var new_host = new ParkingHost(trigger.host_id, trigger.username, trigger.email);
+
+                        var new_world = new RegistrationWorld(world.hosts.Union(new_host.ToEnumerable()), world.guests);
+
+                        return new Response<RegistrationWorld>(new_world, new ParkingHostCreated(new_host.host_id, new_host.username).ToEnumerable());
+
+
+
+
+                    },
+                    () => type_init_error(request)
+                );
+        }
+
+        private static Response<RegistrationWorld> type_init_error(Request<RegistrationWorld> request)
+        {
+            return new Response<RegistrationWorld>(request.world, new TriggerInitialisationError<CreateParkingGuest>().ToEnumerable());
         }
     }
 }
