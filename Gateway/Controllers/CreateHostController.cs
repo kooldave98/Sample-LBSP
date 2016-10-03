@@ -3,7 +3,6 @@ using System.Text;
 using System.Web.Http;
 using CodeStructures;
 using LbspSOA;
-using Newtonsoft.Json;
 using Registration.Interface;
 
 namespace Gateway.Controllers
@@ -19,7 +18,7 @@ namespace Gateway.Controllers
 
             event_store.Publish(
                 new RawEvent(Guid.NewGuid(),
-                            Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(trigger)),
+                            trigger.ToBytes(),
                             null,
                             nameof(CreateParkingHost)
                             ).ToEnumerable()

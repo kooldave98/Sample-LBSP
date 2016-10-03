@@ -23,6 +23,7 @@ namespace LbspSOA
                     .Select(e => resolve_pointer(e.Event.Data.ToJsonString()));
         }
 
+        private ConcurrentDictionary<Guid, byte> received_request_ids = new ConcurrentDictionary<Guid, byte>();
         private ConcurrentDictionary<Guid, byte> processed_request_ids = new ConcurrentDictionary<Guid, byte>();
 
         public void Subscribe(string stream_name, Action<RecordedRawEvent> on_message_received)
@@ -32,8 +33,16 @@ namespace LbspSOA
             connection.SubscribeToStreamFrom(stream_name, StreamPosition.Start, settings,
                 (e, s) =>
                 {
-                    if (!s.Event.EventType.Contains(LoggedEventPointer))
+                    if(!received_request_ids.ContainsKey(s.Event.EventId)
+                        &&
+                        !processed_request_ids.ContainsKey(s.Event.EventId) 
+                        &&
+                        !s.Event.EventType.Contains(LoggedEventPointer))
                     {
+                        received_request_ids.AddOrUpdate(s.Event.EventId, default(byte), (g, b) => b);
+
+
+
                         on_message_received(new RecordedRawEvent(new RawEvent(s.Event.EventId,
                                                                                 s.Event.Data,
                                                                                 s.Event.Metadata,
@@ -74,6 +83,8 @@ namespace LbspSOA
 
             
             processed_request_ids.AddOrUpdate(origin_event.raw_event.id, default(byte), (g, b) => b);
+            //cleanup
+            byte remove; received_request_ids.TryRemove(origin_event.raw_event.id, out remove);
 
             events =
                 events.Union(new EventData(Guid.NewGuid(),
@@ -108,7 +119,8 @@ namespace LbspSOA
         private IEnumerable<ResolvedEvent> read_log(string stream_name, ReadDirection read_direction, int buffer)
         {
             StreamEventsSlice currentSlice;
-            var nextSliceStart = StreamPosition.Start;
+
+            var nextSliceStart = read_direction == ReadDirection.Forward ? StreamPosition.Start : StreamPosition.End;
 
             do
             {
@@ -164,17 +176,17 @@ namespace LbspSOA
 
         private Dictionary<Guid, byte> get_latest_idempotency_values()
         {
-
             var raw_json = 
                 read_log(current_domain_stream, ReadDirection.Backward, 2)
                     .Where(e => e.Event.EventType.StartsWith(LoggedEventPointer))
                     .Select(e => e.Event.Metadata.ToJsonString())
                     .FirstOrDefault();
 
-            return 
+            return (
                 raw_json == null ? 
-                new Dictionary<Guid, byte>() : 
-                JsonConvert.DeserializeObject<Dictionary<Guid, byte>>(raw_json);
+                new ProcessedRequestIdsWrapper() : 
+                JsonConvert.DeserializeObject<ProcessedRequestIdsWrapper>(raw_json)
+                ).processed_request_ids;
         }
 
         public GESEventStore(string permanent_world_name)
@@ -199,6 +211,11 @@ namespace LbspSOA
 
         private readonly string current_domain_stream;
         private readonly IEventStoreConnection connection;
+    }
+
+    public class ProcessedRequestIdsWrapper
+    {
+        public Dictionary<Guid, byte> processed_request_ids { get; set; }
     }
 
 }

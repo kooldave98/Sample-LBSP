@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace LbspSOA
@@ -82,7 +81,9 @@ namespace LbspSOA
                                     event_store.PublishErrors(input_raw_event, payload);
                                 }
                             }
-                        );                    
+                        );
+
+                    Console.WriteLine($"Finished event with id: {response.raw_request.id}");
                 }
 
             });
