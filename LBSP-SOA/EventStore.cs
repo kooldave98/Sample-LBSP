@@ -30,7 +30,7 @@ namespace LbspSOA
         {
             var settings = new CatchUpSubscriptionSettings(50, 10, true, true);
 
-            connection.SubscribeToStreamFrom(stream_name, StreamPosition.Start, settings,
+            connection.SubscribeToStreamFrom(stream_name, StreamCheckpoint.StreamStart, settings,
                 (e, s) =>
                 {
                     if(!received_request_ids.ContainsKey(s.Event.EventId)
@@ -79,9 +79,7 @@ namespace LbspSOA
             //events to publish
             var events = raw_events.Select(payload => new EventData(payload.id, payload.type, true, payload.data, payload.metadata));
 
-            //add origin request
 
-            
             processed_request_ids.AddOrUpdate(origin_event.raw_event.id, default(byte), (g, b) => b);
             //cleanup
             byte remove; received_request_ids.TryRemove(origin_event.raw_event.id, out remove);
@@ -106,6 +104,10 @@ namespace LbspSOA
 
         public void PublishErrors(RecordedRawEvent origin_event, IEnumerable<RawEvent> raw_events)
         {
+            //Add to in-memory: will be made durable when the next request is persisted
+            processed_request_ids.AddOrUpdate(origin_event.raw_event.id, default(byte), (g, b) => b);
+            byte remove; received_request_ids.TryRemove(origin_event.raw_event.id, out remove);
+
             var events = raw_events.Select(payload => new EventData(payload.id, payload.type, true, payload.data, payload.metadata));
 
 
@@ -215,7 +217,7 @@ namespace LbspSOA
 
     public class ProcessedRequestIdsWrapper
     {
-        public Dictionary<Guid, byte> processed_request_ids { get; set; }
+        public Dictionary<Guid, byte> processed_request_ids { get; set; } = new Dictionary<Guid, byte>();
     }
 
 }
