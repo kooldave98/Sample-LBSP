@@ -17,7 +17,7 @@ namespace Gateway.Controllers
 
             var event_store = new GESEventStore(Gateway.Interface.NameService.ContextName);
 
-            event_store.PublishResponse(
+            event_store.Publish(
                 new RawEvent(Guid.NewGuid(),
                             Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(trigger)),
                             null,

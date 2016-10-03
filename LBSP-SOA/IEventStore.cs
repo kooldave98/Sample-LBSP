@@ -9,8 +9,8 @@ namespace LbspSOA
     public interface IEventStore
     {
         IEnumerable<RawEvent> get_history();
-        void PublishResponse(IEnumerable<RawEvent> events, RecordedRawEvent origin_event = null);
-        void PublishErrors(IEnumerable<RawEvent> raw_events, string origin_stream);
+        void CommitAndPublish(RecordedRawEvent origin_event, IEnumerable<RawEvent> events);
+        void PublishErrors(RecordedRawEvent origin_event, IEnumerable<RawEvent> raw_events);
         void Subscribe(string stream_name, Action<RecordedRawEvent> on_message_received);
         void unsubscribe_all();
     }

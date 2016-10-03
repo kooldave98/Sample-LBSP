@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -13,12 +14,16 @@ namespace LbspSOA
     {
         private const string LoggedEventPointer = "LoggedEventPointer";
 
+        private const string ProcessedRequests = "ProcessedRequests";
+
         public IEnumerable<RawEvent> get_history()
         {
             return read_log(current_domain_stream, ReadDirection.Forward, 50)
-                    .Where(e => e.Event.EventType.StartsWith(LoggedEventPointer))//Todo: standardise===>>> $"{LoggedEventPointer}-{log_payload.stream_name}"
+                    .Where(e => e.Event.EventType.StartsWith(LoggedEventPointer))
                     .Select(e => resolve_pointer(e.Event.Data.ToJsonString()));
         }
+
+        private ConcurrentDictionary<Guid, byte> processed_request_ids = new ConcurrentDictionary<Guid, byte>();
 
         public void Subscribe(string stream_name, Action<RecordedRawEvent> on_message_received)
         {
@@ -46,21 +51,9 @@ namespace LbspSOA
                 });
         }
 
-        public void PublishResponse(IEnumerable<RawEvent> raw_events, RecordedRawEvent origin_event = null)
+        public void Publish(IEnumerable<RawEvent> raw_events)
         {
-            var log_payload = origin_event.ToPointer();
-
             var events = raw_events.Select(payload => new EventData(payload.id, payload.type, true, payload.data, payload.metadata));
-
-            if (log_payload != null)
-            {
-                events =
-                events.Union(new EventData(Guid.NewGuid(),
-                                            $"{LoggedEventPointer}-{log_payload.stream_name}", //Todo: wrap this in a constant
-                                            true,
-                                            log_payload.ToBytes(), null).ToEnumerable());
-            }
-
 
             connection
                 .AppendToStreamAsync(current_domain_stream,
@@ -69,13 +62,44 @@ namespace LbspSOA
                 .Wait();
         }
 
-        public void PublishErrors(IEnumerable<RawEvent> raw_events, string origin_stream)
+        public void CommitAndPublish(RecordedRawEvent origin_event, IEnumerable<RawEvent> raw_events)
+        {
+            var log_payload = origin_event.ToPointer();
+
+
+            //events to publish
+            var events = raw_events.Select(payload => new EventData(payload.id, payload.type, true, payload.data, payload.metadata));
+
+            //add origin request
+
+            
+            processed_request_ids.AddOrUpdate(origin_event.raw_event.id, default(byte), (g, b) => b);
+
+            events =
+                events.Union(new EventData(Guid.NewGuid(),
+                                            $"{LoggedEventPointer}-{log_payload.stream_name}", //Todo: wrap this in a constant
+                                            true,
+                                            log_payload.ToBytes(),
+                                            new { processed_request_ids }.ToBytes())
+                                .ToEnumerable());
+
+
+            //publish
+
+            connection
+                .AppendToStreamAsync(current_domain_stream,
+                                    ExpectedVersion.Any,
+                                    events)
+                .Wait();
+        }
+
+        public void PublishErrors(RecordedRawEvent origin_event, IEnumerable<RawEvent> raw_events)
         {
             var events = raw_events.Select(payload => new EventData(payload.id, payload.type, true, payload.data, payload.metadata));
 
 
             connection
-                .AppendToStreamAsync($"{origin_stream}-Errors",
+                .AppendToStreamAsync($"{origin_event.origin_stream}-Errors",
                                     ExpectedVersion.Any,
                                     events)
                 .Wait();
@@ -138,6 +162,21 @@ namespace LbspSOA
             connection.Close();
         }
 
+        private Dictionary<Guid, byte> get_latest_idempotency_values()
+        {
+
+            var raw_json = 
+                read_log(current_domain_stream, ReadDirection.Backward, 2)
+                    .Where(e => e.Event.EventType.StartsWith(LoggedEventPointer))
+                    .Select(e => e.Event.Metadata.ToJsonString())
+                    .FirstOrDefault();
+
+            return 
+                raw_json == null ? 
+                new Dictionary<Guid, byte>() : 
+                JsonConvert.DeserializeObject<Dictionary<Guid, byte>>(raw_json);
+        }
+
         public GESEventStore(string permanent_world_name)
         {
             this.current_domain_stream = permanent_world_name;
@@ -154,6 +193,8 @@ namespace LbspSOA
                     1113));
 
             connection.ConnectAsync().Wait();
+
+            processed_request_ids = new ConcurrentDictionary<Guid, byte>(get_latest_idempotency_values());
         }
 
         private readonly string current_domain_stream;

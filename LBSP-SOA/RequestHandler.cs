@@ -62,7 +62,7 @@ namespace LbspSOA
                                 if (raw_event_requests.TryRemove(response.raw_request.id, out input_raw_event))
                                 {
                                     //Potential data inconsistencies between removing above, and publishing below
-                                    event_store.PublishResponse(payload, input_raw_event);
+                                    event_store.CommitAndPublish(input_raw_event, payload);
                                 }
 
                             },
@@ -79,7 +79,7 @@ namespace LbspSOA
                                 if (raw_event_requests.TryRemove(response.raw_request.id, out input_raw_event))
                                 {
                                     //Potential data inconsistencies between removing above, and publishing below
-                                    event_store.PublishErrors(payload, input_raw_event.origin_stream);
+                                    event_store.PublishErrors(input_raw_event, payload);
                                 }
                             }
                         );                    
