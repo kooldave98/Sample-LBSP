@@ -20,21 +20,21 @@ namespace LbspSOA
                     .Select(e => resolve_pointer(Encoding.UTF8.GetString(e.Event.Data)));
         }
 
-        public void Subscribe(string stream_name, Action<RawEvent> on_message_received)
+        public void Subscribe(string stream_name, Action<RecordedRawEvent> on_message_received)
         {
             var settings = new CatchUpSubscriptionSettings(50, 10, true, true);
 
-            connection.SubscribeToStreamFrom(stream_name, get_last_position(stream_name), settings,
+            connection.SubscribeToStreamFrom(stream_name, StreamPosition.Start, settings,
                 (e, s) =>
                 {
                     if (!s.Event.EventType.Contains(LoggedEventPointer))
                     {
-                        on_message_received(new RawEvent(s.Event.EventId,
-                                                            s.Event.Data,
-                                                            s.Event.Metadata,
-                                                            s.Event.EventType,
-                                                            stream_name,
-                                                            s.Event.EventNumber));
+                        on_message_received(new RecordedRawEvent(new RawEvent(s.Event.EventId,
+                                                                                s.Event.Data,
+                                                                                s.Event.Metadata,
+                                                                                s.Event.EventType),
+                                                                    stream_name,
+                                                                    s.Event.EventNumber));
                     }
 
                 }, null,
@@ -46,8 +46,10 @@ namespace LbspSOA
                 });
         }
 
-        public void PublishResponse(IEnumerable<RawEvent> raw_events, RawEventPointer log_payload = null)
+        public void PublishResponse(IEnumerable<RawEvent> raw_events, RecordedRawEvent origin_event = null)
         {
+            var log_payload = origin_event.ToPointer();
+
             var events = raw_events.Select(payload => new EventData(payload.id, payload.type, true, payload.data, payload.metadata));
 
             if (log_payload != null)
@@ -114,12 +116,12 @@ namespace LbspSOA
         {
             return
                 resolve_pointer(
-                    JsonConvert.DeserializeObject<RawEventPointer>(pointer_as_json)
+                    JsonConvert.DeserializeObject<RecordedRawEventPointer>(pointer_as_json)
                 );
 
         }
 
-        private RawEvent resolve_pointer(RawEventPointer pointer)
+        private RawEvent resolve_pointer(RecordedRawEventPointer pointer)
         {
             var task = connection.ReadEventAsync(pointer.stream_name, pointer.position, false);
 
@@ -130,20 +132,6 @@ namespace LbspSOA
             return new RawEvent(raw.EventId, raw.Data, raw.Metadata, raw.EventType);
 
         }
-
-        //Todo: This would only work 
-        //if (saved-last-processed-event-number <= count(published-events))
-        private int get_last_position(string stream_name)
-        {
-            var resolved_event =
-                read_log(current_domain_stream, ReadDirection.Backward, 2)
-                    .FirstOrDefault(e => e.Event.EventType == $"{LoggedEventPointer}-{stream_name}");
-
-            return resolved_event.Event == null ? 0 : resolved_event.Event.EventNumber;            
-        }
-
-
-
 
         public void unsubscribe_all()
         {

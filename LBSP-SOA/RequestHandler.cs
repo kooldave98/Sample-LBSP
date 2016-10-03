@@ -11,13 +11,13 @@ namespace LbspSOA
 {
     public class RequestHandler<W> where W : IWorld
     {
-        private void handle(RawEvent raw_event)
+        private void handle(RecordedRawEvent raw_event)
         {
-            Console.WriteLine($"Received event with id: {raw_event.id}");
+            Console.WriteLine($"Received event with id: {raw_event.raw_event.id}");
 
-            var request = to_raw_request(raw_event);
+            var request = to_raw_request(raw_event.raw_event);
 
-            if (raw_event_requests.TryAdd(raw_event.id, raw_event))
+            if (raw_event_requests.TryAdd(raw_event.raw_event.id, raw_event))
             {
                 requests.Add(request);
             }
@@ -25,6 +25,7 @@ namespace LbspSOA
 
         private RawRequest<W> to_raw_request(RawEvent raw_event)
         {
+            var o = JToken.Parse(Encoding.UTF8.GetString(raw_event.data));
             return
             new RawRequest<W>(raw_event.id,
                         JToken.Parse(Encoding.UTF8.GetString(raw_event.data)),
@@ -32,7 +33,7 @@ namespace LbspSOA
                         router.get_handler(raw_event.type));
         }
 
-        private ConcurrentDictionary<Guid, RawEvent> raw_event_requests = new ConcurrentDictionary<Guid, RawEvent>();
+        private ConcurrentDictionary<Guid, RecordedRawEvent> raw_event_requests = new ConcurrentDictionary<Guid, RecordedRawEvent>();
 
         public void start_listening(params string[] streams)
         {
@@ -56,12 +57,12 @@ namespace LbspSOA
                                             , Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new { parent_id = response.raw_request.id }))//Every event has a pointer to its parent event
                                             , ev.GetType().Name));
 
-                                RawEvent input_raw_event;
+                                RecordedRawEvent input_raw_event;
 
                                 if (raw_event_requests.TryRemove(response.raw_request.id, out input_raw_event))
                                 {
                                     //Potential data inconsistencies between removing above, and publishing below
-                                    event_store.PublishResponse(payload, input_raw_event.ToPointer());
+                                    event_store.PublishResponse(payload, input_raw_event);
                                 }
 
                             },
@@ -73,7 +74,7 @@ namespace LbspSOA
                                             , Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new { parent_id = response.raw_request.id }))//Every event has a pointer to its parent event
                                             , ev.GetType().Name));
 
-                                RawEvent input_raw_event;
+                                RecordedRawEvent input_raw_event;
 
                                 if (raw_event_requests.TryRemove(response.raw_request.id, out input_raw_event))
                                 {

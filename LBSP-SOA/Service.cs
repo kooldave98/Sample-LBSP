@@ -38,7 +38,7 @@ namespace LbspSOA
 
         private RawResponse<W> process(RawRequest<W> request)
         {
-            var pattern_request = new Request<W>(world, request.memento.as_attributes);
+            var pattern_request = new Request<W>(world, request.memento);
 
             Response<W> response;
 

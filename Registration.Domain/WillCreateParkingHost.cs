@@ -24,19 +24,19 @@ namespace Registration.Domain
                         //validation 1: prevent duplicate id
                         if (world.hosts.Any(h => h.host_id == trigger.host_id))
                         {
-                            errors.Add(new ParkingGuestIDTaken(trigger.host_id));
+                            errors.Add(new ParkingHostIDTaken(trigger.host_id));
                         }
 
                         //validation 2: prevent duplicate names
                         if (world.hosts.Any(h => h.username == trigger.username))
                         {
-                            errors.Add(new ParkingGuestUsernameTaken(trigger.username));
+                            errors.Add(new ParkingHostUsernameTaken(trigger.username));
                         }
 
                         //validation 2: prevent duplicate names
                         if (world.hosts.Any(h => h.email == trigger.email))
                         {
-                            errors.Add(new ParkingGuestUsernameTaken(trigger.username));
+                            errors.Add(new ParkingHostUsernameTaken(trigger.username));
                         }
 
                         if (errors.Any())
@@ -61,7 +61,7 @@ namespace Registration.Domain
 
         private static Response<RegistrationWorld> type_init_error(Request<RegistrationWorld> request)
         {
-            return new Response<RegistrationWorld>(request.world, new TriggerInitialisationError<CreateParkingGuest>().ToEnumerable());
+            return new Response<RegistrationWorld>(request.world, new TriggerInitialisationError<CreateParkingHost>().ToEnumerable());
         }
     }
 }
