@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Booking.Interface
+namespace Gateway.Interface
 {
-    public class Class1
+    public class NameService
     {
+        public const string ContextName = "GatewayContext";
     }
 }

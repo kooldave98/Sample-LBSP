@@ -12,7 +12,7 @@ namespace Query.Service
         {
             //var event_store = new GESEventStore("Query");
 
-            //event_store.Subscribe("RegistrationWorld", raw_event => {
+            //event_store.Subscribe(Registration.Interface.NameService.ContextName, raw_event => {
 
             //    if(raw_event.type == nameof(ParkingHostCreated))
             //    {

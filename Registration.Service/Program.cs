@@ -20,14 +20,14 @@ namespace Registration.Service
             var request_handler = 
                 new RequestHandler<RegistrationWorld>(request_queue, 
                                                     response_queue, 
-                                                    new GESEventStore(nameof(RegistrationWorld)), 
+                                                    new GESEventStore(Registration.Interface.NameService.ContextName), 
                                                     new Router());
 
             service.replay(request_handler.get_history());
 
             service.start();
 
-            request_handler.start_listening("Gateway");
+            request_handler.start_listening(Gateway.Interface.NameService.ContextName);
 
             Console.ReadLine();
 

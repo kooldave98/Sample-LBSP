@@ -15,7 +15,7 @@ namespace Gateway.Controllers
         {
             var trigger = new CreateParkingHost(Guid.NewGuid(), username, email);
 
-            var event_store = new GESEventStore("Gateway");
+            var event_store = new GESEventStore(Gateway.Interface.NameService.ContextName);
 
             event_store.PublishResponse(
                 new RawEvent(Guid.NewGuid(),

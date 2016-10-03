@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{09CEF03E-21D0-40F2-AB2E-8E08C6E0E016}</ProjectGuid>
+    <ProjectGuid>{82A1903B-0015-4ED4-80A1-DE90C3854C13}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Registration.Interface</RootNamespace>
-    <AssemblyName>Registration.Interface</AssemblyName>
+    <RootNamespace>Gateway.Interface</RootNamespace>
+    <AssemblyName>Gateway.Interface</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -40,22 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CreateParkingHost.cs" />
-    <Compile Include="CreateParkingGuest.cs" />
     <Compile Include="NameService.cs" />
-    <Compile Include="ParkingGuestCreated.cs" />
-    <Compile Include="ParkingHostCreated.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CodeStructures\CodeStructures.csproj">
-      <Project>{1A5B7952-3781-4ECC-9443-5F32A68DA82D}</Project>
-      <Name>CodeStructures</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\LBSP-SOA\LBSP-SOA.csproj">
-      <Project>{62159671-3A0D-4516-B326-55B1193950E1}</Project>
-      <Name>LBSP-SOA</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

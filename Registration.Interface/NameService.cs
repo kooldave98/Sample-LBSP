@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Listing.Interface
+namespace Registration.Interface
 {
-    public class Class1
+    public class NameService
     {
+        public const string ContextName = "RegistrationContext";
     }
 }

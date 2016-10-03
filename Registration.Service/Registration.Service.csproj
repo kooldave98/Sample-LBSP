@@ -48,6 +48,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Gateway.Interface\Gateway.Interface.csproj">
+      <Project>{82a1903b-0015-4ed4-80a1-de90c3854c13}</Project>
+      <Name>Gateway.Interface</Name>
+    </ProjectReference>
     <ProjectReference Include="..\LBSP-SOA\LBSP-SOA.csproj">
       <Project>{62159671-3A0D-4516-B326-55B1193950E1}</Project>
       <Name>LBSP-SOA</Name>
