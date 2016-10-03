@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace LbspSOA
 {
@@ -34,6 +37,24 @@ namespace LbspSOA
 
 
             return new RecordedRawEventPointer(this.origin_stream, this.position_in_stream);
+        }
+    }
+
+    public static class RawEventExtensions
+    {
+        public static byte[] ToBytes(this object source)
+        {
+            return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(source));
+        }
+
+        public static string ToJsonString(this byte[] bytes_data)
+        {
+            return Encoding.UTF8.GetString(bytes_data);
+        }
+
+        public static dynamic ToJsonDynamic(this byte[] bytes_data)
+        {
+            return JToken.Parse(bytes_data.ToJsonString());
         }
     }
 

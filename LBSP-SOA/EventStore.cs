@@ -17,7 +17,7 @@ namespace LbspSOA
         {
             return read_log(current_domain_stream, ReadDirection.Forward, 50)
                     .Where(e => e.Event.EventType.StartsWith(LoggedEventPointer))//Todo: standardise===>>> $"{LoggedEventPointer}-{log_payload.stream_name}"
-                    .Select(e => resolve_pointer(Encoding.UTF8.GetString(e.Event.Data)));
+                    .Select(e => resolve_pointer(e.Event.Data.ToJsonString()));
         }
 
         public void Subscribe(string stream_name, Action<RecordedRawEvent> on_message_received)
@@ -58,7 +58,7 @@ namespace LbspSOA
                 events.Union(new EventData(Guid.NewGuid(),
                                             $"{LoggedEventPointer}-{log_payload.stream_name}", //Todo: wrap this in a constant
                                             true,
-                                            Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(log_payload)), null).ToEnumerable());
+                                            log_payload.ToBytes(), null).ToEnumerable());
             }
 
 

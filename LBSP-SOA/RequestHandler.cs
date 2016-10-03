@@ -28,7 +28,7 @@ namespace LbspSOA
             var o = JToken.Parse(Encoding.UTF8.GetString(raw_event.data));
             return
             new RawRequest<W>(raw_event.id,
-                        JToken.Parse(Encoding.UTF8.GetString(raw_event.data)),
+                        raw_event.data.ToJsonDynamic(),
                         raw_event.type,
                         router.get_handler(raw_event.type));
         }
@@ -53,8 +53,8 @@ namespace LbspSOA
 
                                 var payload = 
                                     events.Select(ev=> new RawEvent(Guid.NewGuid()
-                                            , Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(ev))
-                                            , Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new { parent_id = response.raw_request.id }))//Every event has a pointer to its parent event
+                                            , ev.ToBytes()
+                                            , new { parent_id = response.raw_request.id }.ToBytes()//Every event has a pointer to its parent event
                                             , ev.GetType().Name));
 
                                 RecordedRawEvent input_raw_event;
@@ -70,8 +70,8 @@ namespace LbspSOA
 
                                 var payload =
                                     errors.Select(ev => new RawEvent(Guid.NewGuid()
-                                            , Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(ev))
-                                            , Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new { parent_id = response.raw_request.id }))//Every event has a pointer to its parent event
+                                            , ev.ToBytes()
+                                            , new { parent_id = response.raw_request.id }.ToBytes()//Every event has a pointer to its parent event
                                             , ev.GetType().Name));
 
                                 RecordedRawEvent input_raw_event;
@@ -98,7 +98,7 @@ namespace LbspSOA
                 .get_history()
                 .Select(ev =>
                             new RawRequest<W>(ev.id,
-                                            JToken.Parse(Encoding.UTF8.GetString(ev.data)),
+                                            ev.data.ToJsonDynamic(),
                                             ev.type,
                                             router.get_handler(ev.type)));
         }
