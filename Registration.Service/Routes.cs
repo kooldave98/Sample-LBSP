@@ -24,9 +24,9 @@ namespace Registration.Service
         {
             route_dictionary = new Dictionary<string, Func<Request<RegistrationWorld>, Response<RegistrationWorld>>>()
             {
-                { nameof(CreateParkingHost), new WillCreateParkingHost().handle },
+                { nameof(RegisterParkingHost), new WillCreateParkingHost().handle },
 
-                { nameof(CreateParkingGuest), new WillCreateParkingGuest().handle },
+                { nameof(RegisterParkingGuest), new WillCreateParkingGuest().handle },
             };
         }
     }

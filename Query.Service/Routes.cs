@@ -24,7 +24,7 @@ namespace Query.Service
         {
             route_dictionary = new Dictionary<string, Func<Request<QueryWorld>, Response<QueryWorld>>>()
             {
-                { nameof(ParkingHostCreated), new WillMaterialiseParkingHost().handle },
+                { nameof(ParkingHostRegistered), new WillMaterialiseParkingHost().handle },
             };
         }
     }

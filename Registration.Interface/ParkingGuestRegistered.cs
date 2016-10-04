@@ -4,12 +4,12 @@ using LbspSOA;
 
 namespace Registration.Interface
 {
-    public class ParkingGuestCreated : ITrigger
+    public class ParkingGuestRegistered : ITrigger
     {
         public Guid guest_id { get; set; }
         public string username { get; set; }
 
-        public ParkingGuestCreated(Guid guest_id, string username)
+        public ParkingGuestRegistered(Guid guest_id, string username)
         {
             this.guest_id = Guard.IsNotNull(guest_id, nameof(guest_id));
             this.username = Guard.IsNotNull(username, nameof(username));

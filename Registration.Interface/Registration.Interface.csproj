@@ -40,11 +40,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CreateParkingHost.cs" />
-    <Compile Include="CreateParkingGuest.cs" />
+    <Compile Include="RegisterParkingHost.cs" />
+    <Compile Include="RegisterParkingGuest.cs" />
     <Compile Include="NameService.cs" />
-    <Compile Include="ParkingGuestCreated.cs" />
-    <Compile Include="ParkingHostCreated.cs" />
+    <Compile Include="ParkingGuestRegistered.cs" />
+    <Compile Include="ParkingHostRegistered.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

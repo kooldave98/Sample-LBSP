@@ -13,14 +13,14 @@ namespace Gateway.Controllers
         [Route("api/create-parking-host")]
         public async Task<bool> Get(string username, string email)
         {
-            var trigger = new CreateParkingHost(Guid.NewGuid(), username, email);
+            var trigger = new RegisterParkingHost(Guid.NewGuid(), username, email);
 
             var event_store = new GESEventStore(Gateway.Interface.NameService.ContextName);
 
             var outgoing_event = new RawEvent(Guid.NewGuid(),
                                                 trigger.ToBytes(),
                                                 null,
-                                                nameof(CreateParkingHost)
+                                                nameof(RegisterParkingHost)
                                                 );
 
             var tcs = new TaskCompletionSource<bool>();

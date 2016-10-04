@@ -10,7 +10,7 @@ namespace Query.Domain
         public Response<QueryWorld> handle(Request<QueryWorld> request)
         {
             return
-            (ParkingHostCreated.from_dynamic(request.trigger) as IMaybe<ParkingHostCreated>)
+            (ParkingHostRegistered.from_dynamic(request.trigger) as IMaybe<ParkingHostRegistered>)
                 .Match(trigger =>
                 {
                     var repository = new Repository<Host>(request.world.db_context);
@@ -31,7 +31,7 @@ namespace Query.Domain
 
         private static Response<QueryWorld> type_init_error(Request<QueryWorld> request)
         {
-            return new Response<QueryWorld>(request.world, new TriggerInitialisationError<ParkingHostCreated>().ToEnumerable());
+            return new Response<QueryWorld>(request.world, new TriggerInitialisationError<ParkingHostRegistered>().ToEnumerable());
         }
     }
 }

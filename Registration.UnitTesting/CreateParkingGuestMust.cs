@@ -24,7 +24,7 @@ namespace Registration.UnitTesting
 
         private Request<RegistrationWorld> new_request()
         {
-            var trigger = new CreateParkingGuest(Guid.NewGuid(), "kooldave98");
+            var trigger = new RegisterParkingGuest(Guid.NewGuid(), "kooldave98");
 
             var as_json = JsonConvert.SerializeObject(trigger);
 

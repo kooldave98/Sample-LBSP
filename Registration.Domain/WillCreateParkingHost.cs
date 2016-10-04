@@ -11,8 +11,8 @@ namespace Registration.Domain
         public Response<RegistrationWorld> handle(Request<RegistrationWorld> request)
         {
             return
-            (CreateParkingHost
-                .from_dynamic(request.trigger) as IMaybe<CreateParkingHost>)
+            (RegisterParkingHost
+                .from_dynamic(request.trigger) as IMaybe<RegisterParkingHost>)
                 .Match(
                     trigger => {
                         //has value
@@ -49,7 +49,7 @@ namespace Registration.Domain
 
                         var new_world = new RegistrationWorld(world.hosts.Union(new_host.ToEnumerable()), world.guests);
 
-                        return new Response<RegistrationWorld>(new_world, new ParkingHostCreated(new_host.host_id, new_host.username).ToEnumerable());
+                        return new Response<RegistrationWorld>(new_world, new ParkingHostRegistered(new_host.host_id, new_host.username).ToEnumerable());
 
 
 
@@ -61,7 +61,7 @@ namespace Registration.Domain
 
         private static Response<RegistrationWorld> type_init_error(Request<RegistrationWorld> request)
         {
-            return new Response<RegistrationWorld>(request.world, new TriggerInitialisationError<CreateParkingHost>().ToEnumerable());
+            return new Response<RegistrationWorld>(request.world, new TriggerInitialisationError<RegisterParkingHost>().ToEnumerable());
         }
     }
 }

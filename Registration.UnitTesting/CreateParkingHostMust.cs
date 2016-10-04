@@ -42,7 +42,7 @@ namespace Registration.UnitTesting
 
         private Request<RegistrationWorld> new_request()
         {
-            var trigger = new CreateParkingHost(Guid.NewGuid(), "kooldave98", "kooldave98@hotmail.com");
+            var trigger = new RegisterParkingHost(Guid.NewGuid(), "kooldave98", "kooldave98@hotmail.com");
 
             var as_json = JsonConvert.SerializeObject(trigger);
 
