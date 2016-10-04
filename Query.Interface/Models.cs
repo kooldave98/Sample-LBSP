@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Query.Service
+namespace Query.Interface
 {
     public class Host
     {

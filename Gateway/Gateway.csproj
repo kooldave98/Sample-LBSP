@@ -142,6 +142,10 @@
       <Project>{62159671-3A0D-4516-B326-55B1193950E1}</Project>
       <Name>LBSP-SOA</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Query.Interface\Query.Interface.csproj">
+      <Project>{18edda4f-e9a6-464a-98c9-0051da144879}</Project>
+      <Name>Query.Interface</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Registration.Interface\Registration.Interface.csproj">
       <Project>{09CEF03E-21D0-40F2-AB2E-8E08C6E0E016}</Project>
       <Name>Registration.Interface</Name>

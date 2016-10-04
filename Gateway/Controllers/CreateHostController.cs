@@ -16,13 +16,21 @@ namespace Gateway.Controllers
 
             var event_store = new GESEventStore(Gateway.Interface.NameService.ContextName);
 
-            event_store.Publish(
-                new RawEvent(Guid.NewGuid(),
-                            trigger.ToBytes(),
-                            null,
-                            nameof(CreateParkingHost)
-                            ).ToEnumerable()
-                        );
+            var outgoing_event = new RawEvent(Guid.NewGuid(),
+                                                trigger.ToBytes(),
+                                                null,
+                                                nameof(CreateParkingHost)
+                                                );
+
+
+            event_store.SubscribeHenceForth(Query.Interface.NameService.ContextName, recorded_event => {
+                if((Guid)recorded_event.raw_event.metadata.ToJsonDynamic().parent_id == outgoing_event.id)
+                {
+
+                }
+            });
+
+            event_store.Publish(outgoing_event.ToEnumerable());
         }
     }
 }

@@ -12,6 +12,7 @@ namespace LbspSOA
         void CommitAndPublish(RecordedRawEvent origin_event, IEnumerable<RawEvent> events);
         void PublishErrors(RecordedRawEvent origin_event, IEnumerable<RawEvent> raw_events);
         void Subscribe(string stream_name, Action<RecordedRawEvent> on_message_received);
+        void SubscribeHenceForth(string stream_name, Action<RecordedRawEvent> on_message_received);
         void unsubscribe_all();
     }
 

@@ -26,6 +26,33 @@ namespace LbspSOA
         private ConcurrentDictionary<Guid, byte> received_request_ids = new ConcurrentDictionary<Guid, byte>();
         private ConcurrentDictionary<Guid, byte> processed_request_ids = new ConcurrentDictionary<Guid, byte>();
 
+        public void SubscribeHenceForth(string stream_name, Action<RecordedRawEvent> on_message_received)
+        {
+            connection.SubscribeToStreamAsync(stream_name, true,
+                (e, s) =>
+                {
+                    
+                    received_request_ids.AddOrUpdate(s.Event.EventId, default(byte), (g, b) => b);
+
+
+
+                    on_message_received(new RecordedRawEvent(new RawEvent(s.Event.EventId,
+                                                                            s.Event.Data,
+                                                                            s.Event.Metadata,
+                                                                            s.Event.EventType),
+                                                                stream_name,
+                                                                s.Event.EventNumber));
+                    
+
+                },
+                (ess, dr, ex) =>
+                {
+                    Console.WriteLine($"Subscription to {stream_name} dropped .. reconnecting");
+
+                    Subscribe(stream_name, on_message_received);
+                });
+        }
+
         public void Subscribe(string stream_name, Action<RecordedRawEvent> on_message_received)
         {
             var settings = new CatchUpSubscriptionSettings(50, 10, true, true);

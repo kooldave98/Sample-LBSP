@@ -56,8 +56,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AppDbContext.cs" />
-    <Compile Include="Models.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -66,9 +64,17 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CodeStructures\CodeStructures.csproj">
+      <Project>{1A5B7952-3781-4ECC-9443-5F32A68DA82D}</Project>
+      <Name>CodeStructures</Name>
+    </ProjectReference>
     <ProjectReference Include="..\LBSP-SOA\LBSP-SOA.csproj">
       <Project>{62159671-3a0d-4516-b326-55b1193950e1}</Project>
       <Name>LBSP-SOA</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Query.Interface\Query.Interface.csproj">
+      <Project>{18edda4f-e9a6-464a-98c9-0051da144879}</Project>
+      <Name>Query.Interface</Name>
     </ProjectReference>
     <ProjectReference Include="..\Registration.Interface\Registration.Interface.csproj">
       <Project>{09CEF03E-21D0-40F2-AB2E-8E08C6E0E016}</Project>

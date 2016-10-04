@@ -1,13 +1,14 @@
-﻿using System.Linq;
-using System.Data.Entity;
+﻿using System.Data.Entity;
+using System.Linq;
+using CodeStructures;
 
-namespace Query.Service
+namespace Query.Interface
 {
     public class Repository<T> where T : class
     {
-        public Repository()
+        public Repository(DbContext context)
         {
-            context = new AppDbContext();
+            this.context = Guard.IsNotNull(context, nameof(context));
         }
 
         public IQueryable<T> Entities { get { return context.Set<T>(); } }
@@ -37,27 +38,7 @@ namespace Query.Service
             context.SaveChanges();
         }
 
-        private readonly AppDbContext context;
+        private readonly DbContext context;
 
     }
-
-    public class AppDbContext : DbContext
-    {
-        public AppDbContext()
-            : base("name=AppDbContext")
-        {
-
-            InitialiseDatabase();
-        }
-
-        public DbSet<Host> Hosts { get; set; }
-
-
-        private void InitialiseDatabase()
-        {
-            Database.SetInitializer(new CreateDatabaseIfNotExists<AppDbContext>());
-            Database.Initialize(false);
-        }
-    }
-
 }

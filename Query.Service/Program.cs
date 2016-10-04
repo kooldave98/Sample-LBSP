@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Text;
+using CodeStructures;
 using LbspSOA;
-using Newtonsoft.Json.Linq;
+using Query.Interface;
 using Registration.Interface;
 
 namespace Query.Service
@@ -10,48 +10,46 @@ namespace Query.Service
     {
         static void Main(string[] args)
         {
-            //var event_store = new GESEventStore("Query");
+            var event_store = new GESEventStore(Interface.NameService.ContextName);
 
-            //event_store.Subscribe(Registration.Interface.NameService.ContextName, raw_event => {
+            event_store.Subscribe(Registration.Interface.NameService.ContextName, raw_event =>
+            {
 
-            //    if(raw_event.type == nameof(ParkingHostCreated))
-            //    {
-            //        Console.WriteLine("Query domain received event");
+                if (raw_event.raw_event.type == nameof(ParkingHostCreated))
+                {
+                    Console.WriteLine("Query domain received event");
 
-            //        var data = JArray.Parse(Encoding.UTF8.GetString(raw_event.data)) as dynamic;
-
-
-            //        var repository = new Repository<Host>();
-
-            //        repository.add(new Host()
-            //        {
-            //            HostID = data.host_id,
-            //            Email = data.email,
-            //            Username = data.username
-            //        });
-
-            //        repository.commit();
+                    var data = raw_event.raw_event.data.ToJsonDynamic();
 
 
-            //        //var payload =
-            //        //    new RawEvent(raw_event.id,
-            //        //                raw_event.id.ToByteArray(),
-            //        //                null,
-            //        //                "WfaUpdated");
+                    var repository = new Repository<Host>(new AppDbContext());
 
-            //        //event_store.Publish("QueryDomain", payload);
+                    repository.add(new Host()
+                    {
+                        HostID = data.host_id,
+                        Email = data.email,
+                        Username = data.username
+                    });
 
-            //        Console.WriteLine("Query domain finished writing event");
-            //    }
-                
-            //});
+                    repository.commit();
+                    
 
-            //Console.WriteLine("Started listening for events");
+                    var to_publish =
+                        new RawEvent(Guid.NewGuid(),
+                                    new ParkingHostMaterialised().ToBytes(),
+                                    new { parent_id = raw_event.raw_event.id }.ToBytes(),
+                                    nameof(ParkingHostMaterialised));
 
-            //Console.ReadLine();
+                    event_store.CommitAndPublish(raw_event, to_publish.ToEnumerable());
+
+                    Console.WriteLine("Query domain finished writing event");
+                }
+
+            });
+
+            Console.WriteLine("Started listening for events");
+
+            Console.ReadLine();
         }
     }
-
 }
-
-
