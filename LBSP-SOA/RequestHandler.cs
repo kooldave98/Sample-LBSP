@@ -2,34 +2,33 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 
 namespace LbspSOA
 {
     public class RequestHandler<W> where W : IWorld
     {
-        private void handle(RecordedRawEvent raw_event)
+        private void handle(RecordedRawEvent recorded_event)
         {
-            Console.WriteLine($"Received event with id: {raw_event.raw_event.id}");
+            Console.WriteLine($"Received event with id: {recorded_event.raw_event.id}");
 
-            var request = to_raw_request(raw_event.raw_event);
+            if(!router.is_route_handler_defined(recorded_event.raw_event.type))
+            {
+                Console.WriteLine($"No handler defined for event with id: {recorded_event.raw_event.id}");
 
-            if (raw_event_requests.TryAdd(raw_event.raw_event.id, raw_event))
+                return;
+            }
+
+            var request = new RawRequest<W>(recorded_event.raw_event.id,
+                                            recorded_event.raw_event.data.ToJsonDynamic(),
+                                            recorded_event.raw_event.type,
+                                            router.get_handler(recorded_event.raw_event.type));
+
+            if (raw_event_requests.TryAdd(recorded_event.raw_event.id, recorded_event))
             {
                 requests.Add(request);
             }
-        }
 
-        private RawRequest<W> to_raw_request(RawEvent raw_event)
-        {
-            var o = JToken.Parse(Encoding.UTF8.GetString(raw_event.data));
-            return
-            new RawRequest<W>(raw_event.id,
-                        raw_event.data.ToJsonDynamic(),
-                        raw_event.type,
-                        router.get_handler(raw_event.type));
         }
 
         private ConcurrentDictionary<Guid, RecordedRawEvent> raw_event_requests = new ConcurrentDictionary<Guid, RecordedRawEvent>();

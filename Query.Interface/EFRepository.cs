@@ -33,11 +33,6 @@ namespace Query.Interface
             }
         }
 
-        public void commit()
-        {
-            context.SaveChanges();
-        }
-
         private readonly DbContext context;
 
     }

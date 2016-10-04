@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using CodeStructures;
 using LbspSOA;
+using Query.Interface;
 using Registration.Interface;
 
 namespace Gateway.Controllers
@@ -10,7 +11,7 @@ namespace Gateway.Controllers
     public class CreateHostController : ApiController
     {
         [Route("api/create-parking-host")]
-        public async Task<object> Get(string username, string email)
+        public async Task<bool> Get(string username, string email)
         {
             var trigger = new CreateParkingHost(Guid.NewGuid(), username, email);
 
@@ -21,12 +22,15 @@ namespace Gateway.Controllers
                                                 null,
                                                 nameof(CreateParkingHost)
                                                 );
-            var tcs = new TaskCompletionSource<object>();
+
+            var tcs = new TaskCompletionSource<bool>();
 
             event_store.SubscribeHenceForth(Query.Interface.NameService.ContextName, recorded_event => {
-                if((Guid)recorded_event.raw_event.metadata.ToJsonDynamic().parent_id == outgoing_event.id)
+                if(recorded_event.raw_event.type == nameof(ParkingHostMaterialised)
+                    &&
+                    recorded_event.raw_event.data.ToJsonDynamic().host_id == trigger.host_id)
                 {
-                    tcs.TrySetResult(new { });
+                    tcs.TrySetResult(true);
                 }
             });
 

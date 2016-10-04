@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using CodeStructures;
 using LbspSOA;
-using Query.Interface;
+using Query.Domain;
 using Registration.Interface;
 
 namespace Query.Service
@@ -10,46 +11,29 @@ namespace Query.Service
     {
         static void Main(string[] args)
         {
-            var event_store = new GESEventStore(Interface.NameService.ContextName);
+            var request_queue = new BlockingCollection<RawRequest<QueryWorld>>();
 
-            event_store.Subscribe(Registration.Interface.NameService.ContextName, raw_event =>
-            {
+            var response_queue = new BlockingCollection<RawResponse<QueryWorld>>();
 
-                if (raw_event.raw_event.type == nameof(ParkingHostCreated))
-                {
-                    Console.WriteLine("Query domain received event");
+            var service = new LbspService<QueryWorld>(request_queue, response_queue, QueryWorld.seed_world());
 
-                    var data = raw_event.raw_event.data.ToJsonDynamic();
+            var request_handler =
+                new RequestHandler<QueryWorld>(request_queue,
+                                                    response_queue,
+                                                    new GESEventStore(Query.Interface.NameService.ContextName),
+                                                    new Router());
 
+            //No replay in Query service
 
-                    var repository = new Repository<Host>(new AppDbContext());
+            service.start();
 
-                    repository.add(new Host()
-                    {
-                        HostID = data.host_id,
-                        Email = data.email,
-                        Username = data.username
-                    });
-
-                    repository.commit();
-                    
-
-                    var to_publish =
-                        new RawEvent(Guid.NewGuid(),
-                                    new ParkingHostMaterialised().ToBytes(),
-                                    new { parent_id = raw_event.raw_event.id }.ToBytes(),
-                                    nameof(ParkingHostMaterialised));
-
-                    event_store.CommitAndPublish(raw_event, to_publish.ToEnumerable());
-
-                    Console.WriteLine("Query domain finished writing event");
-                }
-
-            });
-
-            Console.WriteLine("Started listening for events");
+            request_handler.start_listening(Registration.Interface.NameService.ContextName);
 
             Console.ReadLine();
+
+            request_handler.stop_listening();
+
+            service.stop();
         }
     }
 }
