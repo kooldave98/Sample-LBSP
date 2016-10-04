@@ -26,7 +26,7 @@ namespace LbspSOA
         private ConcurrentDictionary<Guid, byte> received_request_ids = new ConcurrentDictionary<Guid, byte>();
         private ConcurrentDictionary<Guid, byte> processed_request_ids = new ConcurrentDictionary<Guid, byte>();
 
-        public void SubscribeHenceForth(string stream_name, Action<RecordedRawEvent> on_message_received)
+        public void SubscribeHenceForth(string stream_name, Action<RecordedRawEvent> on_message_received, Func<RecordedRawEvent, bool> filter = null)
         {
             connection.SubscribeToStreamAsync(stream_name, true,
                 (e, s) =>
@@ -34,14 +34,19 @@ namespace LbspSOA
                     
                     received_request_ids.AddOrUpdate(s.Event.EventId, default(byte), (g, b) => b);
 
-
-
-                    on_message_received(new RecordedRawEvent(new RawEvent(s.Event.EventId,
+                    var recorded_event = new RecordedRawEvent(new RawEvent(s.Event.EventId,
                                                                             s.Event.Data,
                                                                             s.Event.Metadata,
                                                                             s.Event.EventType),
                                                                 stream_name,
-                                                                s.Event.EventNumber));
+                                                                s.Event.EventNumber);
+                    if(filter == null 
+                        || 
+                        filter(recorded_event))
+                    {
+                        on_message_received(recorded_event);
+                    }
+                    
                     
 
                 },
@@ -53,7 +58,7 @@ namespace LbspSOA
                 });
         }
 
-        public void Subscribe(string stream_name, Action<RecordedRawEvent> on_message_received)
+        public void Subscribe(string stream_name, Action<RecordedRawEvent> on_message_received, Func<RecordedRawEvent, bool> filter = null)
         {
             var settings = new CatchUpSubscriptionSettings(50, 10, true, true);
 
@@ -65,17 +70,24 @@ namespace LbspSOA
                         !processed_request_ids.ContainsKey(s.Event.EventId) 
                         &&
                         !s.Event.EventType.Contains(LoggedEventPointer))
-                    {
-                        received_request_ids.AddOrUpdate(s.Event.EventId, default(byte), (g, b) => b);
+                    {                       
 
+                        var recorded_event =
+                            new RecordedRawEvent(new RawEvent(s.Event.EventId,
+                                                                s.Event.Data,
+                                                                s.Event.Metadata,
+                                                                s.Event.EventType),
+                                                    stream_name,
+                                                    s.Event.EventNumber);
 
+                        if (filter == null
+                            ||
+                            filter(recorded_event))
+                        {
+                            received_request_ids.AddOrUpdate(s.Event.EventId, default(byte), (g, b) => b);
 
-                        on_message_received(new RecordedRawEvent(new RawEvent(s.Event.EventId,
-                                                                                s.Event.Data,
-                                                                                s.Event.Metadata,
-                                                                                s.Event.EventType),
-                                                                    stream_name,
-                                                                    s.Event.EventNumber));
+                            on_message_received(recorded_event);
+                        }
                     }
 
                 }, null,

@@ -25,14 +25,16 @@ namespace Gateway.Controllers
 
             var tcs = new TaskCompletionSource<bool>();
 
-            event_store.SubscribeHenceForth(Query.Interface.NameService.ContextName, recorded_event => {
-                if(recorded_event.raw_event.type == nameof(ParkingHostMaterialised)
-                    &&
-                    recorded_event.raw_event.data.ToJsonDynamic().host_id == trigger.host_id)
-                {
-                    tcs.TrySetResult(true);
-                }
-            });
+            Func<RecordedRawEvent, bool> predicate = 
+                re => re.raw_event.type == nameof(ParkingHostMaterialised)
+                        && re.raw_event.data.ToJsonDynamic().host_id == trigger.host_id;
+
+            event_store
+                .SubscribeHenceForth(
+                    Query.Interface.NameService.ContextName, 
+                    re => tcs.TrySetResult(true), 
+                    predicate
+                );
 
             event_store.Publish(outgoing_event.ToEnumerable());
 

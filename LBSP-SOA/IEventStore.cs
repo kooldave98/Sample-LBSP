@@ -11,8 +11,8 @@ namespace LbspSOA
         IEnumerable<RawEvent> get_history();
         void CommitAndPublish(RecordedRawEvent origin_event, IEnumerable<RawEvent> events);
         void PublishErrors(RecordedRawEvent origin_event, IEnumerable<RawEvent> raw_events);
-        void Subscribe(string stream_name, Action<RecordedRawEvent> on_message_received);
-        void SubscribeHenceForth(string stream_name, Action<RecordedRawEvent> on_message_received);
+        void Subscribe(string stream_name, Action<RecordedRawEvent> on_message_received, Func<RecordedRawEvent, bool> filter = null);
+        void SubscribeHenceForth(string stream_name, Action<RecordedRawEvent> on_message_received, Func<RecordedRawEvent, bool> filter = null);
         void unsubscribe_all();
     }
 
