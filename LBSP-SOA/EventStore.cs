@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Text;
 using CodeStructures;
 using EventStore.ClientAPI;
@@ -26,8 +28,10 @@ namespace LbspSOA
         private ConcurrentDictionary<Guid, byte> received_request_ids = new ConcurrentDictionary<Guid, byte>();
         private ConcurrentDictionary<Guid, byte> processed_request_ids = new ConcurrentDictionary<Guid, byte>();
 
-        public void SubscribeHenceForth(string stream_name, Action<RecordedRawEvent> on_message_received, Func<RecordedRawEvent, bool> filter = null)
+        public IObservable<RecordedRawEvent> NewEvents(string stream_name, Subject<RecordedRawEvent> new_subject = null)
         {
+            new_subject = new_subject ?? new Subject<RecordedRawEvent>();
+
             connection.SubscribeToStreamAsync(stream_name, true,
                 (e, s) =>
                 {
@@ -40,37 +44,35 @@ namespace LbspSOA
                                                                             s.Event.EventType),
                                                                 stream_name,
                                                                 s.Event.EventNumber);
-                    if(filter == null 
-                        || 
-                        filter(recorded_event))
-                    {
-                        on_message_received(recorded_event);
-                    }
-                    
-                    
+
+                    new_subject.OnNext(recorded_event);
 
                 },
                 (ess, dr, ex) =>
                 {
                     Console.WriteLine($"Subscription to {stream_name} dropped .. reconnecting");
 
-                    Subscribe(stream_name, on_message_received);
+                    NewEvents(stream_name, new_subject);
                 });
+
+            return new_subject.AsObservable();
         }
 
-        public void Subscribe(string stream_name, Action<RecordedRawEvent> on_message_received, Func<RecordedRawEvent, bool> filter = null)
+        public IObservable<RecordedRawEvent> AllUnprocessedEvents(string stream_name, Subject<RecordedRawEvent> allUnprocessedSubject = null)
         {
+            allUnprocessedSubject = allUnprocessedSubject ?? new Subject<RecordedRawEvent>();
+
             var settings = new CatchUpSubscriptionSettings(50, 10, true, true);
 
             connection.SubscribeToStreamFrom(stream_name, StreamCheckpoint.StreamStart, settings,
                 (e, s) =>
                 {
-                    if(!received_request_ids.ContainsKey(s.Event.EventId)
+                    if (!received_request_ids.ContainsKey(s.Event.EventId)
                         &&
-                        !processed_request_ids.ContainsKey(s.Event.EventId) 
+                        !processed_request_ids.ContainsKey(s.Event.EventId)
                         &&
                         !s.Event.EventType.Contains(LoggedEventPointer))
-                    {                       
+                    {
 
                         var recorded_event =
                             new RecordedRawEvent(new RawEvent(s.Event.EventId,
@@ -80,14 +82,11 @@ namespace LbspSOA
                                                     stream_name,
                                                     s.Event.EventNumber);
 
-                        if (filter == null
-                            ||
-                            filter(recorded_event))
-                        {
-                            received_request_ids.AddOrUpdate(s.Event.EventId, default(byte), (g, b) => b);
 
-                            on_message_received(recorded_event);
-                        }
+                        received_request_ids.AddOrUpdate(s.Event.EventId, default(byte), (g, b) => b);
+
+                        allUnprocessedSubject.OnNext(recorded_event);
+
                     }
 
                 }, null,
@@ -95,8 +94,10 @@ namespace LbspSOA
                 {
                     Console.WriteLine($"Subscription to {stream_name} dropped .. reconnecting");
 
-                    Subscribe(stream_name, on_message_received);
+                    AllUnprocessedEvents(stream_name, allUnprocessedSubject);
                 });
+
+            return allUnprocessedSubject.AsObservable();
         }
 
         public void Publish(IEnumerable<RawEvent> raw_events)

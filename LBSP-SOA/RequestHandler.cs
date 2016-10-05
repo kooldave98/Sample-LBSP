@@ -37,7 +37,9 @@ namespace LbspSOA
         {
             foreach (var stream in streams)
             {
-                event_store.Subscribe(stream, handle);
+                event_store
+                    .AllUnprocessedEvents(stream)
+                    .Subscribe(handle);
             }
             
 

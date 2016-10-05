@@ -5,6 +5,7 @@ using CodeStructures;
 using LbspSOA;
 using Query.Interface;
 using Registration.Interface;
+using System.Reactive.Linq;
 
 namespace Gateway.Controllers
 {
@@ -17,24 +18,15 @@ namespace Gateway.Controllers
 
             var event_store = new GESEventStore(Gateway.Interface.NameService.ContextName);
 
-            var outgoing_event = new RawEvent(Guid.NewGuid(),
-                                                trigger.ToBytes(),
-                                                null,
-                                                nameof(RegisterParkingHost)
-                                                );
+            var outgoing_event = trigger.ToRawEvent();
 
             var tcs = new TaskCompletionSource<bool>();
 
-            Func<RecordedRawEvent, bool> predicate = 
-                re => re.raw_event.type == nameof(ParkingHostMaterialised)
-                        && re.raw_event.data.ToJsonDynamic().host_id == trigger.host_id;
-
             event_store
-                .SubscribeHenceForth(
-                    Query.Interface.NameService.ContextName, 
-                    re => tcs.TrySetResult(true), 
-                    predicate
-                );
+                .NewEvents(Query.Interface.NameService.ContextName)
+                .Where(re => re.raw_event.type == nameof(ParkingHostMaterialised))
+                .Where(re => re.raw_event.data.ToJsonDynamic().host_id == trigger.host_id)
+                .Subscribe(re => tcs.TrySetResult(true));
 
             event_store.Publish(outgoing_event.ToEnumerable());
 
