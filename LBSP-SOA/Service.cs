@@ -3,54 +3,87 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using CodeStructures;
+using System.Linq;
 
 namespace LbspSOA
 {
     public class LbspService<W> where W : IWorld
     {
-        public LbspService
-                (BlockingCollection<RawRequest<W>> request_queue
-                , BlockingCollection<RawResponse<W>> response_queue
-                , W initial_world)
-        {
+        private W _world;
 
-            this.request_queue = request_queue;
-            this.response_queue = response_queue;
-            this.world = initial_world;
+        private RequestHandler<W> _requestHandler;
+
+        private IRouter<W> _router;
+
+        private GESEventStore _eventStore;
+
+        private BlockingCollection<RawRequest<W>> _requestQueue;
+
+        private BlockingCollection<RawResponse<W>> _responseQueue;
+
+        public BlockingCollection<RawRequest<W>> RequestQueue => _requestQueue;
+        public BlockingCollection<RawResponse<W>> ResponseQueue => _responseQueue;
+
+        public HashSet<string> Streams { get; set; }
+
+        public bool ReplayHistory { get; set; }
+                
+
+        public LbspService(W initialWorld, string context, IRouter<W> router)
+        {
+            _world = initialWorld;
+
+            _eventStore = new GESEventStore(context);
+
+            _router = router;
+
+            _requestQueue = new BlockingCollection<RawRequest<W>>();
+
+            _responseQueue = new BlockingCollection<RawResponse<W>>();
+
+            _requestHandler = new RequestHandler<W>(_requestQueue, _responseQueue, _eventStore, _router);
+
+            Streams = new HashSet<string>();
         }
 
 
-        public void start()
+        public void Start()
         {
+            if (ReplayHistory)
+            {
+                replay(_requestHandler.get_history());
+            }
+
+            _requestHandler.start_listening(Streams.ToArray());
+
             Task.Run(() =>
             {
-                foreach (var request in request_queue.GetConsumingEnumerable())
+                foreach (var request in _requestQueue.GetConsumingEnumerable())
                 {
-                    var response = process(request);
+                    var response = Process(request);
 
-                    response_queue.Add(response);
+                    _responseQueue.Add(response);
                 }
-
             });
 
             Console.WriteLine("Started domain service...");
         }
 
-        private RawResponse<W> process(RawRequest<W> request)
+        private RawResponse<W> Process(RawRequest<W> request)
         {
-            var pattern_request = new Request<W>(world, request.memento);
+            var patternRequest = new Request<W>(_world, request.memento);
 
             Response<W> response;
 
             try
             {
-                response = request.handler(pattern_request);
+                response = request.handler(patternRequest);
                 //This is very important
-                world = response.world;
+                _world = response.world;
             }
-            catch(Exception e)
+            catch
             {
-                response = new Response<W>(world, new UnknownError().ToEnumerable());
+                response = new Response<W>(_world, new UnknownError().ToEnumerable());
             }
 
             return new RawResponse<W>(request, response);
@@ -61,23 +94,22 @@ namespace LbspSOA
             Console.WriteLine("Started re-playing domain events to build world...");
             foreach (var request in requests)
             {
-                process(request);
+                Process(request);
                 Console.WriteLine($"replayed request: {request.id}");
             }
 
             Console.WriteLine("Finished re-playing domain events ...");
         }
 
-        public void stop()
+        public void Stop()
         {
+            _requestHandler.stop_listening();
             //Todo: 
             //What do we do here ?
             //Do we really even need this ?
         }
 
-        private W world;
-
-        readonly BlockingCollection<RawRequest<W>> request_queue;
-        readonly BlockingCollection<RawResponse<W>> response_queue;
+        //readonly BlockingCollection<RawRequest<W>> request_queue;
+        //readonly BlockingCollection<RawResponse<W>> response_queue;
     }
 }
