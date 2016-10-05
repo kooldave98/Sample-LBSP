@@ -35,14 +35,19 @@ namespace LbspSOA
 
         public void start_listening(params string[] streams)
         {
+            init_responder();
+
             foreach (var stream in streams)
             {
                 event_store
                     .AllUnprocessedEvents(stream)
                     .Subscribe(handle);
             }
-            
 
+        }
+
+        private void init_responder()
+        { 
             Task.Run(() => {
                 foreach (var response in responses.GetConsumingEnumerable())
                 {
