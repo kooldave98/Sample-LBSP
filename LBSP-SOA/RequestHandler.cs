@@ -33,6 +33,11 @@ namespace LbspSOA
 
         private ConcurrentDictionary<Guid, RecordedRawEvent> raw_event_requests = new ConcurrentDictionary<Guid, RecordedRawEvent>();
 
+        public void start_listening(IEnumerable<string> streams)
+        {
+            start_listening(streams.ToArray());
+        }
+
         public void start_listening(params string[] streams)
         {
             init_responder();

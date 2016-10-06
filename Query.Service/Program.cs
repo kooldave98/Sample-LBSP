@@ -1,5 +1,4 @@
-﻿using System;
-using LbspSOA;
+﻿using LbspSOA;
 using Query.Domain;
 
 namespace Query.Service
@@ -8,17 +7,14 @@ namespace Query.Service
     {
         static void Main(string[] args)
         {
-            var service = new LbspService<QueryWorld>(QueryWorld.seed_world(), Query.Interface.NameService.ContextName, new Router());
+            var context_name = Query.Interface.NameService.ContextName;
+            var seed_world = QueryWorld.seed_world();
+            var router = new Router();
 
-            //No replay in Query service
-
-            service.Streams.Add(Registration.Interface.NameService.ContextName);
-
-            service.Start();
-
-            Console.ReadLine();
-
-            service.Stop();
+            new 
+                ServiceBootstrap<QueryWorld>(context_name, seed_world, router)                
+                .listen_to(Registration.Interface.NameService.ContextName)
+                .StartService();
         }
     }
 }

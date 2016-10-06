@@ -1,5 +1,4 @@
-﻿using System;
-using LbspSOA;
+﻿﻿using LbspSOA;
 using Registration.Domain;
 
 namespace Registration.Service
@@ -8,18 +7,14 @@ namespace Registration.Service
     {
         static void Main(string[] args)
         {
-            var service = new LbspService<RegistrationWorld>(RegistrationWorld.seed_world(), Registration.Interface.NameService.ContextName, new Router());
+            var context_name = Registration.Interface.NameService.ContextName;
+            var seed_world = RegistrationWorld.seed_world();
+            var router = new Router();
 
-            service.ReplayHistory = true;
-
-            service.Streams.Add(Gateway.Interface.NameService.ContextName);
-
-            service.Start();
-
-            Console.ReadLine();
-
-            service.Stop();
-
+            new ServiceBootstrap<RegistrationWorld>(context_name, seed_world, router)
+                .replay()
+                .listen_to(Gateway.Interface.NameService.ContextName)
+                .StartService();
         }
     }
 }
