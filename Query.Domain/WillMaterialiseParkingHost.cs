@@ -5,7 +5,7 @@ using Registration.Interface;
 
 namespace Query.Domain
 {
-    public class WillMaterialiseParkingHost : IBehavior<QueryWorld>
+    public class WillMaterialiseParkingHost : ITriggerHandler<QueryWorld>
     {
         public Response<QueryWorld> handle(Request<QueryWorld> request)
         {

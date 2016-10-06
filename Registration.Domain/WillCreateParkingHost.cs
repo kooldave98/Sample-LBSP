@@ -6,7 +6,7 @@ using Registration.Interface;
 
 namespace Registration.Domain
 {
-    public class WillCreateParkingHost : IBehavior<RegistrationWorld>
+    public class WillCreateParkingHost : ITriggerHandler<RegistrationWorld>
     {
         public Response<RegistrationWorld> handle(Request<RegistrationWorld> request)
         {

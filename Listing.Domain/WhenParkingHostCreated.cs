@@ -3,7 +3,7 @@ using LbspSOA;
 
 namespace Listing.Domain
 {
-    public class WhenParkingHostCreated : IBehavior<ListingWorld>
+    public class WhenParkingHostCreated : ITriggerHandler<ListingWorld>
     {
         public Response<ListingWorld> handle(Request<ListingWorld> request)
         {

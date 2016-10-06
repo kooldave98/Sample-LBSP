@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace LbspSOA
 {
-    public interface IBehavior<W> where W : IWorld
+    public interface ITriggerHandler<W> where W : IWorld
     {
         Response<W> handle(Request<W> request);
     }
