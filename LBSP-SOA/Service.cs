@@ -48,7 +48,7 @@ namespace LbspSOA
                 //This is very important
                 world = response.world;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 response = new Response<W>(world, new UnknownError().ToEnumerable());
             }
