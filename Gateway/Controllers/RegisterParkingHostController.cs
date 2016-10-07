@@ -9,14 +9,12 @@ using System.Reactive.Linq;
 
 namespace Gateway.Controllers
 {
-    public class CreateHostController : ApiController
+    public class RegisterParkingHostController : ApiController
     {
-        [Route("api/create-parking-host")]
-        public async Task<object> Get(string username, string email)
+        [Route("api/register-parking-host")]
+        public async Task<object> Get(RegisterParkingHost trigger)
         {
             var event_store = new GESEventStore(Gateway.Interface.NameService.ContextName);
-
-            var trigger = new RegisterParkingHost(Guid.NewGuid(), username, email);
 
             var outgoing_event = trigger.ToRawEvent();
 
@@ -25,7 +23,7 @@ namespace Gateway.Controllers
             event_store
                 .NewEvents(Query.Interface.NameService.ContextName)
                 .Where(re => re.raw_event.type == nameof(ParkingHostMaterialised))
-                .Where(re => re.raw_event.data.ToJsonDynamic().host_id == trigger.host_id)
+                .Where(re => re.raw_event.data.To<ParkingHostMaterialised>().host_id == trigger.host_id)
                 .Subscribe(re => tcs.SetResult(null));
 
             event_store.Publish(outgoing_event.ToEnumerable());

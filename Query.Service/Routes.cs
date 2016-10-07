@@ -8,7 +8,7 @@ namespace Query.Service
 {
     public class Router : IRouter<QueryWorld>
     {
-        public Func<Request<QueryWorld>, Response<QueryWorld>> get_handler(string route_name)
+        public ITriggerHandler<QueryWorld, ITrigger> get_handler(string route_name)
         {
             return route_dictionary[route_name];
         }
@@ -18,13 +18,13 @@ namespace Query.Service
             return route_dictionary.ContainsKey(route_name);
         }
 
-        private readonly Dictionary<string, Func<Request<QueryWorld>, Response<QueryWorld>>> route_dictionary;
+        private readonly Dictionary<string, ITriggerHandler<QueryWorld, ITrigger>> route_dictionary;
 
         public Router()
         {
-            route_dictionary = new Dictionary<string, Func<Request<QueryWorld>, Response<QueryWorld>>>()
+            route_dictionary = new Dictionary<string, ITriggerHandler<QueryWorld, ITrigger>>()
             {
-                { nameof(ParkingHostRegistered), new WillMaterialiseParkingHost().handle },
+                { nameof(ParkingHostRegistered), new WillMaterialiseParkingHost() as ITriggerHandler<QueryWorld, ITrigger> },
             };
         }
     }

@@ -22,15 +22,11 @@ namespace Registration.UnitTesting
             Assert.AreEqual(1, response.events.Count());
         }
 
-        private Request<RegistrationWorld> new_request()
+        private Request<RegistrationWorld, RegisterParkingGuest> new_request()
         {
             var trigger = new RegisterParkingGuest(Guid.NewGuid(), "kooldave98");
-
-            var as_json = JsonConvert.SerializeObject(trigger);
-
-            dynamic as_dynamic = JToken.Parse(as_json);
             
-            return new Request<RegistrationWorld>(RegistrationWorld.seed_world(), as_dynamic);
+            return new Request<RegistrationWorld, RegisterParkingGuest>(RegistrationWorld.seed_world(), trigger);
         }
     }
 }

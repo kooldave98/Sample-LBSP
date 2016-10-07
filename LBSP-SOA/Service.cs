@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using CodeStructures;
+using Newtonsoft.Json;
 
 namespace LbspSOA
 {
@@ -38,20 +39,33 @@ namespace LbspSOA
 
         private RawResponse<W> process(RawRequest<W> request)
         {
-            var pattern_request = new Request<W>(world, request.memento);
-
             Response<W> response;
 
             try
             {
-                response = request.handler(pattern_request);
-                //This is very important
-                world = response.world;
+                var trigger = request.trigger_as_json.To(request.handler.trigger_type());
+
+                var pattern_request = new Request<W, ITrigger>(world, trigger as ITrigger);                
+
+                response = request.handler.handle(pattern_request);                
+            }
+            catch (JsonSerializationException e)
+            {
+                var trigger_error_type = typeof(TriggerInitialisationError<>);
+
+                var generic_trigger_error_type = trigger_error_type.MakeGenericType(request.handler.trigger_type());
+
+                var trigger_error = Activator.CreateInstance(generic_trigger_error_type);
+
+                response = new Response<W>(world, (trigger_error as ITrigger).ToEnumerable());
             }
             catch (Exception e)
             {
                 response = new Response<W>(world, new UnknownError().ToEnumerable());
             }
+            
+
+            world = response.world;//This is very important
 
             return new RawResponse<W>(request, response);
         }

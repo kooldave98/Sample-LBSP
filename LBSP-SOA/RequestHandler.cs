@@ -20,7 +20,7 @@ namespace LbspSOA
             }
 
             var request = new RawRequest<W>(recorded_event.raw_event.id,
-                                            recorded_event.raw_event.data.ToJsonDynamic(),
+                                            recorded_event.raw_event.data.ToJsonString(),
                                             recorded_event.raw_event.type,
                                             router.get_handler(recorded_event.raw_event.type));
 
@@ -110,7 +110,7 @@ namespace LbspSOA
                 .get_history()
                 .Select(ev =>
                             new RawRequest<W>(ev.id,
-                                            ev.data.ToJsonDynamic(),
+                                            ev.data.ToJsonString(),
                                             ev.type,
                                             router.get_handler(ev.type)));
         }

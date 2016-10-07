@@ -54,9 +54,24 @@ namespace LbspSOA
             return Encoding.UTF8.GetString(bytes_data);
         }
 
-        public static dynamic ToJsonDynamic(this byte[] bytes_data)
+        public static T To<T>(this string json_string)
         {
-            return JToken.Parse(bytes_data.ToJsonString());
+            return JsonConvert.DeserializeObject<T>(json_string);
+        }
+
+        public static T To<T>(this byte[] bytes_data)
+        {
+            return To<T>(bytes_data.ToJsonString());
+        }
+
+        public static object To(this string json_string, Type target_type)
+        {
+            return JsonConvert.DeserializeObject(json_string, target_type);
+        }
+
+        public static object To(this byte[] bytes_data, Type target_type)
+        {
+            return To(bytes_data.ToJsonString(), target_type);
         }
     }
 

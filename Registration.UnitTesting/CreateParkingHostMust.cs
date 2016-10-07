@@ -3,7 +3,6 @@ using System.Linq;
 using LbspSOA;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Registration.Domain;
 using Registration.Interface;
 
@@ -56,15 +55,11 @@ namespace Registration.UnitTesting
             );
         }
 
-        private Request<RegistrationWorld> new_request()
+        private Request<RegistrationWorld, RegisterParkingHost> new_request()
         {
             var trigger = new RegisterParkingHost(Guid.NewGuid(), "kooldave98", "kooldave98@hotmail.com");
-
-            var as_json = JsonConvert.SerializeObject(trigger);
-
-            dynamic as_dynamic = JToken.Parse(as_json);
             
-            return new Request<RegistrationWorld>(RegistrationWorld.seed_world(), as_dynamic);
+            return new Request<RegistrationWorld, RegisterParkingHost>(RegistrationWorld.seed_world(), trigger);
         }
     }
 }

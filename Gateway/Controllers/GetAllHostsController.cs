@@ -9,11 +9,14 @@ namespace Gateway.Controllers
         [Route("api/get-all-hosts")]
         public IEnumerable<Host> Get()
         {
-            //CurrentDbContext.Configuration.ProxyCreationEnabled = false;
-            //AND- disable all those change tracking etc 
+            var context = new AppDbContext();
+
+            context.Configuration.AutoDetectChangesEnabled = false;
+            context.Configuration.LazyLoadingEnabled = false;
+            context.Configuration.ProxyCreationEnabled = false;
 
             return
-                new Repository<Host>(new AppDbContext())
+                new Repository<Host>(context)
                 .Entities;
         }
     }

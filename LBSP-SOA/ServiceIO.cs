@@ -8,18 +8,18 @@ namespace LbspSOA
 
         public string service_type { get; private set; }
 
-        public dynamic memento { get; private set; }
+        public string trigger_as_json { get; private set; }
 
-        public Func<Request<W>, Response<W>> handler { get; private set; }
+        public ITriggerHandler<W, ITrigger> handler { get; private set; }
 
         public RawRequest
                 (Guid id
-                , dynamic attributes
+                , string trigger_as_json
                 , string service_type
-                , Func<Request<W>, Response<W>> handler)
+                , ITriggerHandler<W, ITrigger> handler)
         {
             this.id = id;
-            this.memento = attributes;
+            this.trigger_as_json = trigger_as_json;
             this.service_type = service_type;
             this.handler = handler;
         }

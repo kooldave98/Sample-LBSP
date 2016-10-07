@@ -4,17 +4,18 @@ using System.Linq;
 
 namespace LbspSOA
 {
-    public interface ITriggerHandler<W> where W : IWorld
+    public interface ITriggerHandler<W, T> where W : IWorld where T : ITrigger
     {
-        Response<W> handle(Request<W> request);
+        Response<W> handle(Request<W, T> request);
+        Type trigger_type();
     }
 
-    public sealed class Request<W> where W : IWorld
+    public sealed class Request<W, T> where W : IWorld where T : ITrigger
     {
         public W world;
-        public dynamic trigger;
+        public T trigger;
 
-        public Request(W world, dynamic trigger)
+        public Request(W world, T trigger)
         {
             this.world = world;
             this.trigger = trigger;
@@ -38,10 +39,15 @@ namespace LbspSOA
             is_success(events);
         }
 
-        public Response(W world, IEnumerable<ITrigger> events)
+        public Response(W world, params ITrigger[] events)
         {
             this.world = world;
             this.events = events;
+        }
+
+        public Response(W world, IEnumerable<ITrigger> events) 
+            : this(world, events.ToArray())
+        {
         }
     }
 
