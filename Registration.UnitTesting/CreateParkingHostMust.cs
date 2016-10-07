@@ -23,6 +23,22 @@ namespace Registration.UnitTesting
         }
 
         [TestMethod]
+        public void deserialise_trigger()
+        {
+            var trigger = new RegisterParkingHost(Guid.NewGuid(), "kooldave98", "kooldave98@hotmail.com");
+
+            var as_json = JsonConvert.SerializeObject(trigger);
+
+            var out_trigger = JsonConvert.DeserializeObject<RegisterParkingHost>(as_json);
+
+            Assert.IsNotNull(out_trigger);
+
+            Assert.AreEqual(trigger.host_id, out_trigger.host_id);
+            Assert.AreEqual(trigger.username, out_trigger.username);
+            Assert.AreEqual(trigger.email, out_trigger.email);
+        }
+
+        [TestMethod]
         public void correctly_add_new_host()
         {
             var behaviour = new WillCreateParkingHost();
