@@ -13,7 +13,7 @@ namespace LbspSOA
 
         RequestHandler<W> request_handler;
 
-        public ServiceBootstrap(string context_name, W init_world, IRouter<W> router)
+        public ServiceBootstrap(string context_name, W init_world, IRouter router)
         {
             request_queue = new BlockingCollection<RawRequest<W>>();
             response_queue = new BlockingCollection<RawResponse<W>>();

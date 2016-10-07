@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using LbspSOA;
 using Query.Domain;
 using Registration.Interface;
 
 namespace Query.Service
 {
-    public class Router : IRouter<QueryWorld>
+    public class Router : IRouter
     {
-        public ITriggerHandler<QueryWorld, ITrigger> get_handler(string route_name)
+        public object get_handler(string route_name)
         {
             return route_dictionary[route_name];
         }
@@ -18,13 +17,13 @@ namespace Query.Service
             return route_dictionary.ContainsKey(route_name);
         }
 
-        private readonly Dictionary<string, ITriggerHandler<QueryWorld, ITrigger>> route_dictionary;
+        private readonly Dictionary<string, object> route_dictionary;
 
         public Router()
         {
-            route_dictionary = new Dictionary<string, ITriggerHandler<QueryWorld, ITrigger>>()
+            route_dictionary = new Dictionary<string, object>()
             {
-                { nameof(ParkingHostRegistered), new WillMaterialiseParkingHost() as ITriggerHandler<QueryWorld, ITrigger> },
+                { nameof(ParkingHostRegistered), new WillMaterialiseParkingHost() },
             };
         }
     }

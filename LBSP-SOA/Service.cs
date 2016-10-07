@@ -43,17 +43,23 @@ namespace LbspSOA
 
             try
             {
-                var trigger = request.trigger_as_json.To(request.handler.trigger_type());
+                var trigger_type = (Type)request.trigger_handler.trigger_type();
 
-                var pattern_request = new Request<W, ITrigger>(world, trigger as ITrigger);                
+                var trigger = request.trigger_as_json.To(trigger_type);
 
-                response = request.handler.handle(pattern_request);                
+                var request_type = typeof(Request<,>);
+
+                var generic_request_type = request_type.MakeGenericType(typeof(W), trigger_type);
+
+                var pattern_request = Activator.CreateInstance(generic_request_type, world, trigger);
+
+                response = request.trigger_handler.handle(pattern_request as dynamic);              
             }
             catch (JsonSerializationException e)
             {
                 var trigger_error_type = typeof(TriggerInitialisationError<>);
 
-                var generic_trigger_error_type = trigger_error_type.MakeGenericType(request.handler.trigger_type());
+                var generic_trigger_error_type = trigger_error_type.MakeGenericType(request.trigger_handler.trigger_type());
 
                 var trigger_error = Activator.CreateInstance(generic_trigger_error_type);
 

@@ -5,26 +5,26 @@ using Registration.Interface;
 
 namespace Registration.Service
 {
-    public class Router : IRouter<RegistrationWorld>
+    public class Router : IRouter
     {
         public bool is_route_handler_defined(string route_name)
         {
             return route_dictionary.ContainsKey(route_name);
         }
 
-        ITriggerHandler<RegistrationWorld, ITrigger> IRouter<RegistrationWorld>.get_handler(string route_name)
+        public object get_handler(string route_name)
         {
             return route_dictionary[route_name];
         }
 
-        private readonly Dictionary<string, ITriggerHandler<RegistrationWorld, ITrigger>> route_dictionary;
+        private readonly Dictionary<string, object> route_dictionary;
 
         public Router()
         {
-            route_dictionary = new Dictionary<string, ITriggerHandler<RegistrationWorld, ITrigger>>()
+            route_dictionary = new Dictionary<string, object>()
             {
-                { nameof(RegisterParkingHost), new WillCreateParkingHost() as ITriggerHandler<RegistrationWorld, ITrigger> },
-                { nameof(RegisterParkingHost), new WillCreateParkingGuest() as ITriggerHandler<RegistrationWorld, ITrigger> },
+                { nameof(RegisterParkingHost), new WillRegisterParkingHost() },
+                { nameof(RegisterParkingGuest), new WillRegisterParkingGuest() },
             };
         }
     }

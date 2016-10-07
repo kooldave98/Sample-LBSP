@@ -100,7 +100,7 @@ namespace LbspSOA
             return allUnprocessedSubject.AsObservable();
         }
 
-        public void Publish(IEnumerable<RawEvent> raw_events)
+        public void Publish(params RawEvent[] raw_events)
         {
             var events = raw_events.Select(payload => new EventData(payload.id, payload.type, true, payload.data, payload.metadata));
 
@@ -109,6 +109,11 @@ namespace LbspSOA
                                     ExpectedVersion.Any,
                                     events)
                 .Wait();
+        }
+
+        public void Publish(IEnumerable<RawEvent> raw_events)
+        {
+            Publish(raw_events.ToArray());
         }
 
         public void CommitAndPublish(RecordedRawEvent origin_event, IEnumerable<RawEvent> raw_events)

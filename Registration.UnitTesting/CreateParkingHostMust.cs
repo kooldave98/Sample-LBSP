@@ -14,7 +14,7 @@ namespace Registration.UnitTesting
         [TestMethod]
         public void execute_successfully()
         {
-            var behaviour = new WillCreateParkingHost();
+            var behaviour = new WillRegisterParkingHost();
 
             var response = behaviour.handle(new_request());
 
@@ -40,7 +40,7 @@ namespace Registration.UnitTesting
         [TestMethod]
         public void correctly_add_new_host()
         {
-            var behaviour = new WillCreateParkingHost();
+            var behaviour = new WillRegisterParkingHost();
 
             var request = new_request();
 

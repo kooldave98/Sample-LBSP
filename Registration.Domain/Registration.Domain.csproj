@@ -42,8 +42,8 @@
   <ItemGroup>
     <Compile Include="RegistrationWorld.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WillCreateParkingGuest.cs" />
-    <Compile Include="WillCreateParkingHost.cs" />
+    <Compile Include="WillRegisterParkingGuest.cs" />
+    <Compile Include="WillRegisterParkingHost.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CodeStructures\CodeStructures.csproj">

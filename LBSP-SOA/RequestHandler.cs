@@ -123,7 +123,7 @@ namespace LbspSOA
         public RequestHandler(BlockingCollection<RawRequest<W>> the_requests
                             , BlockingCollection<RawResponse<W>> the_responses
                             , IEventStore the_event_store
-                            , IRouter<W> the_router)
+                            , IRouter the_router)
         {
             requests = the_requests;
             responses = the_responses;
@@ -133,7 +133,7 @@ namespace LbspSOA
 
         private readonly BlockingCollection<RawRequest<W>> requests;
         private readonly BlockingCollection<RawResponse<W>> responses;
-        private readonly IRouter<W> router;
+        private readonly IRouter router;
         private readonly IEventStore event_store;
     }
 }

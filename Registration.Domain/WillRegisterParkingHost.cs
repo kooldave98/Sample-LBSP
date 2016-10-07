@@ -7,7 +7,7 @@ using Registration.Interface;
 
 namespace Registration.Domain
 {
-    public class WillCreateParkingHost : ITriggerHandler<RegistrationWorld, RegisterParkingHost>
+    public class WillRegisterParkingHost : ITriggerHandler<RegistrationWorld, RegisterParkingHost>
     {
         public Response<RegistrationWorld> handle(Request<RegistrationWorld, RegisterParkingHost> request)
         {
@@ -30,7 +30,7 @@ namespace Registration.Domain
             //validation 2: prevent duplicate names
             if (world.hosts.Any(h => h.email == request.trigger.email))
             {
-                errors.Add(new ParkingHostUsernameTaken(request.trigger.username));
+                errors.Add(new ParkingHostEmailTaken(request.trigger.email));
             }
 
             if (errors.Any())

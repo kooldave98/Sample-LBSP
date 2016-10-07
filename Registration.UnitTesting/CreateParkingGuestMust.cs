@@ -15,7 +15,7 @@ namespace Registration.UnitTesting
         [TestMethod]
         public void execute_successfully()
         {
-            var behaviour = new WillCreateParkingGuest();
+            var behaviour = new WillRegisterParkingGuest();
 
             var response = behaviour.handle(new_request());
 
