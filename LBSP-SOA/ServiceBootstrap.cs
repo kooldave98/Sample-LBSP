@@ -13,7 +13,7 @@ namespace LbspSOA
 
         RequestHandler<W> request_handler;
 
-        public ServiceBootstrap(string context_name, W init_world, IRouter router)
+        public ServiceBootstrap(string context_name, W init_world)
         {
             request_queue = new BlockingCollection<RawRequest<W>>();
             response_queue = new BlockingCollection<RawResponse<W>>();
@@ -22,8 +22,7 @@ namespace LbspSOA
             request_handler =
                 new RequestHandler<W>(request_queue,
                                                     response_queue,
-                                                    new GESEventStore(context_name),
-                                                    router);
+                                                    new GESEventStore(context_name));
         }
 
         public ServiceBootstrap<W> replay()

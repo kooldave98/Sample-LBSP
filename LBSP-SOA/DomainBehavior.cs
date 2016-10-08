@@ -7,7 +7,6 @@ namespace LbspSOA
     public interface ITriggerHandler<W, T> where W : IWorld where T : ITrigger
     {
         Response<W> handle(Request<W, T> request);
-        Type trigger_type();
     }
 
     public sealed class Request<W, T> where W : IWorld where T : ITrigger
@@ -27,11 +26,11 @@ namespace LbspSOA
         public W world;
         public IEnumerable<ITrigger> events;
 
-        public void match(Action<IEnumerable<ITrigger>> is_success, Action<IEnumerable<IErrorTrigger>> is_error)
+        public void match(Action<IEnumerable<ITrigger>> is_success, Action<IEnumerable<AnErrorTrigger>> is_error)
         {
             if(events.has_errors())
             {
-                is_error(events.OfType<IErrorTrigger>());
+                is_error(events.OfType<AnErrorTrigger>());
 
                 return;
             }

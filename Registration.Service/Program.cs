@@ -11,7 +11,7 @@ namespace Registration.Service
             var seed_world = RegistrationWorld.seed_world();
             var router = new Router();
 
-            new ServiceBootstrap<RegistrationWorld>(context_name, seed_world, router)
+            new ServiceBootstrap<RegistrationWorld>(context_name, seed_world)
                 .replay()
                 .listen_to(Gateway.Interface.NameService.ContextName)
                 .StartService();

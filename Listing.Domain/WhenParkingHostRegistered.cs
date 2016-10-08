@@ -10,10 +10,5 @@ namespace Listing.Domain
         {
             throw new NotImplementedException();
         }
-
-        public Type trigger_type()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

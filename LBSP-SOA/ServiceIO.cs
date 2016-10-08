@@ -10,18 +10,18 @@ namespace LbspSOA
 
         public string trigger_as_json { get; private set; }
 
-        public dynamic trigger_handler { get; private set; }
+        public HandlerTypeInfo handler_type_info { get; private set; }
 
         public RawRequest
                 (Guid id
                 , string trigger_as_json
                 , string service_type
-                , dynamic trigger_handler)
+                , HandlerTypeInfo trigger_handler_type)
         {
             this.id = id;
             this.trigger_as_json = trigger_as_json;
             this.service_type = service_type;
-            this.trigger_handler = trigger_handler;
+            this.handler_type_info = handler_type_info;
         }
     }
 

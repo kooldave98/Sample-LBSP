@@ -9,17 +9,28 @@ namespace LbspSOA
     {
     }
 
-    public interface IErrorTrigger : ITrigger
+    public abstract class AnErrorTrigger : ITrigger
     {
-        
+        public string message { get; private set; }
+
+        public AnErrorTrigger(string message)
+        {
+            this.message = message;
+        }
     }
 
-    public class TriggerInitialisationError<T> : IErrorTrigger where T : ITrigger
+    public class TriggerInitialisationError<T> : AnErrorTrigger where T : ITrigger
     {
+        public TriggerInitialisationError(string message) : base(message)
+        {
+        }
     }
 
-    public class UnknownError : IErrorTrigger
+    public class UnknownError : AnErrorTrigger
     {
+        public UnknownError(string message) : base(message)
+        {
+        }
     }
 
     public static class TriggerExtensions
@@ -44,7 +55,7 @@ namespace LbspSOA
         {
             Guard.IsNotNull(triggers, nameof(triggers));
 
-            return triggers.has_trigger<IErrorTrigger>();
+            return triggers.has_trigger<AnErrorTrigger>();
         }
     }
 }

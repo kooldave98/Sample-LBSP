@@ -18,31 +18,31 @@ namespace Registration.Interface
         }
     }
 
-    public class ParkingHostUsernameTaken : IErrorTrigger
+    public class ParkingHostUsernameTaken : AnErrorTrigger
     {
         public readonly string username;
 
-        public ParkingHostUsernameTaken(string username)
+        public ParkingHostUsernameTaken(string username) : base("")
         {
             this.username = Guard.IsNotNull(username, nameof(username));
         }
     }
 
-    public class ParkingHostEmailTaken : IErrorTrigger
+    public class ParkingHostEmailTaken : AnErrorTrigger
     {
         public readonly string email;
 
-        public ParkingHostEmailTaken(string email)
+        public ParkingHostEmailTaken(string email) : base("")
         {
             this.email = Guard.IsNotNull(email, nameof(email));
         }
     }
 
-    public class ParkingHostIDTaken : IErrorTrigger
+    public class ParkingHostIDTaken : AnErrorTrigger
     {
         public readonly Guid host_id;
 
-        public ParkingHostIDTaken(Guid host_id)
+        public ParkingHostIDTaken(Guid host_id) : base("")
         {
             this.host_id = Guard.IsNotNull(host_id, nameof(host_id));
         }

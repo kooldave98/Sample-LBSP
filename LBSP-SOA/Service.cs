@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using CodeStructures;
 using Newtonsoft.Json;
@@ -43,31 +44,23 @@ namespace LbspSOA
 
             try
             {
-                var trigger_type = (Type)request.trigger_handler.trigger_type();
+                var trigger = request.trigger_as_json.To(request.handler_type_info.trigger_type);
 
-                var trigger = request.trigger_as_json.To(trigger_type);
+                var pattern_request = Activator.CreateInstance(request.handler_type_info.request_type, world, trigger);
 
-                var request_type = typeof(Request<,>);
-
-                var generic_request_type = request_type.MakeGenericType(typeof(W), trigger_type);
-
-                var pattern_request = Activator.CreateInstance(generic_request_type, world, trigger);
-
-                response = request.trigger_handler.handle(pattern_request as dynamic);              
+                response = (Activator.CreateInstance(request.handler_type_info.handler_type) as dynamic).handle(pattern_request as dynamic);          
             }
             catch (JsonSerializationException e)
             {
-                var trigger_error_type = typeof(TriggerInitialisationError<>);
-
-                var generic_trigger_error_type = trigger_error_type.MakeGenericType(request.trigger_handler.trigger_type());
-
-                var trigger_error = Activator.CreateInstance(generic_trigger_error_type);
+                var trigger_error = 
+                    Activator.CreateInstance(request.handler_type_info.trigger_initialisation_error_type, 
+                                                e.Message + e.InnerException.Message);
 
                 response = new Response<W>(world, (trigger_error as ITrigger).ToEnumerable());
             }
             catch (Exception e)
             {
-                response = new Response<W>(world, new UnknownError().ToEnumerable());
+                response = new Response<W>(world, new UnknownError(e.Message + e.InnerException.Message).ToEnumerable());
             }
             
 

@@ -122,18 +122,18 @@ namespace LbspSOA
 
         public RequestHandler(BlockingCollection<RawRequest<W>> the_requests
                             , BlockingCollection<RawResponse<W>> the_responses
-                            , IEventStore the_event_store
-                            , IRouter the_router)
+                            , IEventStore the_event_store)
         {
             requests = the_requests;
-            responses = the_responses;
-            router = the_router;
+            responses = the_responses;            
             event_store = the_event_store;
+
+            router = new Router();
         }
 
         private readonly BlockingCollection<RawRequest<W>> requests;
         private readonly BlockingCollection<RawResponse<W>> responses;
-        private readonly IRouter router;
+        private readonly Router router;
         private readonly IEventStore event_store;
     }
 }

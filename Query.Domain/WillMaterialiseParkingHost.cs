@@ -24,10 +24,5 @@ namespace Query.Domain
                                         new ParkingHostMaterialised(request.trigger.host_id));
 
         }
-
-        public Type trigger_type()
-        {
-            return typeof(ParkingHostRegistered);
-        }
     }
 }

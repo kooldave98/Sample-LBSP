@@ -12,7 +12,7 @@ namespace Query.Service
             var router = new Router();
 
             new 
-                ServiceBootstrap<QueryWorld>(context_name, seed_world, router)                
+                ServiceBootstrap<QueryWorld>(context_name, seed_world)                
                 .listen_to(Registration.Interface.NameService.ContextName)
                 .StartService();
         }

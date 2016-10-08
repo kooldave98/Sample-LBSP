@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using CodeStructures;
 using LbspSOA;
@@ -44,12 +43,6 @@ namespace Registration.Domain
             var new_world = new RegistrationWorld(world.hosts.Union(new_host.ToEnumerable()), world.guests);
 
             return new Response<RegistrationWorld>(new_world, new ParkingHostRegistered(new_host.host_id, new_host.username));
-
-        }
-
-        public Type trigger_type()
-        {
-            return typeof(RegisterParkingHost);
         }
     }
 }

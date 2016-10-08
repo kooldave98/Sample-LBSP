@@ -34,10 +34,5 @@ namespace Registration.Domain
 
             return new Response<RegistrationWorld>(new_world, new ParkingGuestRegistered(new_guest.guest_id, new_guest.username).ToEnumerable());
         }
-
-        public Type trigger_type()
-        {
-            return typeof(RegisterParkingGuest);
-        }
     }
 }
