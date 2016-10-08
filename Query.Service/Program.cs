@@ -9,7 +9,6 @@ namespace Query.Service
         {
             var context_name = Query.Interface.NameService.ContextName;
             var seed_world = QueryWorld.seed_world();
-            var router = new Router();
 
             new 
                 ServiceBootstrap<QueryWorld>(context_name, seed_world)                

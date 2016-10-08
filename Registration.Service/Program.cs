@@ -9,7 +9,6 @@ namespace Registration.Service
         {
             var context_name = Registration.Interface.NameService.ContextName;
             var seed_world = RegistrationWorld.seed_world();
-            var router = new Router();
 
             new ServiceBootstrap<RegistrationWorld>(context_name, seed_world)
                 .replay()

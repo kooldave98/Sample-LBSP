@@ -1,5 +1,4 @@
-﻿using System;
-using LbspSOA;
+﻿using LbspSOA;
 using Query.Interface;
 using Registration.Interface;
 
