@@ -21,7 +21,7 @@ namespace LbspSOA
             this.id = id;
             this.trigger_as_json = trigger_as_json;
             this.service_type = service_type;
-            this.handler_type_info = handler_type_info;
+            this.handler_type_info = trigger_handler_type;
         }
     }
 

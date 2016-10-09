@@ -28,6 +28,18 @@ namespace LbspSOA
         private ConcurrentDictionary<Guid, byte> received_request_ids = new ConcurrentDictionary<Guid, byte>();
         private ConcurrentDictionary<Guid, byte> processed_request_ids = new ConcurrentDictionary<Guid, byte>();
 
+        public IObservable<RecordedRawEvent> NewEvents(params string[] stream_names)
+        {
+            var new_subject = new Subject<RecordedRawEvent>();
+
+            foreach (var stream in stream_names)
+            {
+                NewEvents(stream, new_subject);
+            }
+
+            return new_subject.AsObservable();
+        }
+
         public IObservable<RecordedRawEvent> NewEvents(string stream_name, Subject<RecordedRawEvent> new_subject = null)
         {
             new_subject = new_subject ?? new Subject<RecordedRawEvent>();
@@ -36,7 +48,7 @@ namespace LbspSOA
                 (e, s) =>
                 {
                     
-                    received_request_ids.AddOrUpdate(s.Event.EventId, default(byte), (g, b) => b);
+                    //received_request_ids.AddOrUpdate(s.Event.EventId, default(byte), (g, b) => b);
 
                     var recorded_event = new RecordedRawEvent(new RawEvent(s.Event.EventId,
                                                                             s.Event.Data,

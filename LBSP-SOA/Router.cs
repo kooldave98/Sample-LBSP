@@ -24,10 +24,10 @@ namespace LbspSOA
                 AppDomain
                 .CurrentDomain
                 .GetAssemblies()
-                .SelectMany(s => s.GetTypes())
-                .Where(type => typeof(ITriggerHandler<,>).IsAssignableFrom(type))
-                .Select(type => new HandlerTypeInfo(type))
-                .ToDictionary(i => i.trigger_type.AssemblyQualifiedName);
+                .SelectMany(ass => ass.GetTypes())
+                .Where(t => t.GetInterfaces().Any(ti => ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(ITriggerHandler<,>)))
+                .Select(t => new HandlerTypeInfo(t))
+                .ToDictionary(i => i.trigger_type.Name);
         }
     }
 
@@ -44,8 +44,10 @@ namespace LbspSOA
         {
             this.handler_type = handler_type;
 
-            trigger_type = handler_type.GetGenericArguments().Single(a => typeof(ITrigger).IsAssignableFrom(a));
-            world_type = handler_type.GetGenericArguments().Single(a => typeof(IWorld).IsAssignableFrom(a));
+            var generic_arguments = handler_type.GetInterfaces().Single().GetGenericArguments();
+
+            trigger_type = generic_arguments.Single(a => typeof(ITrigger).IsAssignableFrom(a));
+            world_type = generic_arguments.Single(a => typeof(IWorld).IsAssignableFrom(a));
 
             request_type = typeof(Request<,>).MakeGenericType(world_type, trigger_type);
 
