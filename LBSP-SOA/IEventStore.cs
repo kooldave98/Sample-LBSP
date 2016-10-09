@@ -64,8 +64,18 @@ namespace LbspSOA
             return To<T>(bytes_data.ToJsonString());
         }
 
-        public static object To(this string json_string, Type target_type)
+        public static T ToAnonType<T>(this byte[] bytes_data, T t_object)
         {
+            return ToAnonType(bytes_data.ToJsonString(), t_object);
+        }
+
+        public static T ToAnonType<T>(this string json_string, T t_object)
+        {
+            return JsonConvert.DeserializeAnonymousType(json_string, t_object);
+        }
+
+        public static object To(this string json_string, Type target_type)
+        {            
             return JsonConvert.DeserializeObject(json_string, target_type);
         }
 

@@ -27,7 +27,7 @@ namespace LbspSOA
                 .SelectMany(s => s.GetTypes())
                 .Where(type => typeof(ITriggerHandler<,>).IsAssignableFrom(type))
                 .Select(type => new HandlerTypeInfo(type))
-                .ToDictionary(i => i.trigger_type.Name);
+                .ToDictionary(i => i.trigger_type.AssemblyQualifiedName);
         }
     }
 
@@ -44,8 +44,8 @@ namespace LbspSOA
         {
             this.handler_type = handler_type;
 
-            trigger_type = handler_type.GenericTypeArguments.Single(a => typeof(ITrigger).IsAssignableFrom(a));
-            world_type = handler_type.GenericTypeArguments.Single(a => typeof(IWorld).IsAssignableFrom(a));
+            trigger_type = handler_type.GetGenericArguments().Single(a => typeof(ITrigger).IsAssignableFrom(a));
+            world_type = handler_type.GetGenericArguments().Single(a => typeof(IWorld).IsAssignableFrom(a));
 
             request_type = typeof(Request<,>).MakeGenericType(world_type, trigger_type);
 

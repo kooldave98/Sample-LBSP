@@ -11,21 +11,50 @@ namespace Gateway.Controllers
     public class RegisterParkingHostController : ApiController
     {
         [Route("api/register-parking-host")]
-        public async Task<object> Post(string username, string email)
+        public async Task<string> Post(RegisterParkingHost trigger)
         {
-            var trigger = new RegisterParkingHost(Guid.NewGuid(), username, email);
+            var response = await send(trigger);
 
-            var event_store = new GESEventStore(Gateway.Interface.NameService.ContextName);            
+            //Need to handle case when ===>
+            //No handler defined for event with id
 
-            var tcs = new TaskCompletionSource<object>();
+            if (response)
+            {
+                return "success";
+            }
+
+
+            return "an error occurred";
+        }
+
+        private async Task<bool> send(RegisterParkingHost trigger)
+        {
+            var trigger_as_raw_event = trigger.ToRawEvent();
+
+
+            var event_store = new GESEventStore(Gateway.Interface.NameService.ContextName);
+            //remember to conserve resources /avoid memory leaks 
+            //=> event_store.unsubscribe_all();
+
+            var tcs = new TaskCompletionSource<bool>();
 
             event_store
                 .NewEvents(Query.Interface.NameService.ContextName)
-                .Where(re => re.raw_event.type == nameof(ParkingHostMaterialised))
-                .Where(re => re.raw_event.data.To<ParkingHostMaterialised>().host_id == trigger.host_id)
-                .Subscribe(re => tcs.SetResult(null));
+                .Where(re => re.raw_event.metadata.ToAnonType(new { parent_id = Guid.NewGuid()}).parent_id == trigger_as_raw_event.id)
+                .Subscribe(re => {
 
-            event_store.Publish(trigger.ToRawEvent());
+                    if(re.raw_event.type == nameof(ParkingHostMaterialised) &&
+                        re.raw_event.data.To<ParkingHostMaterialised>().host_id == trigger.host_id)
+                    {
+                        tcs.TrySetResult(true);
+                    }else
+                    {
+                        tcs.TrySetResult(true);
+                    }
+                    
+                });
+
+            event_store.Publish(trigger_as_raw_event);
 
             return await tcs.Task;
         }

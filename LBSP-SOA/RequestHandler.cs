@@ -62,10 +62,7 @@ namespace LbspSOA
                             is_success: events => {
 
                                 var payload = 
-                                    events.Select(ev=> new RawEvent(Guid.NewGuid()
-                                            , ev.ToBytes()
-                                            , new { parent_id = response.raw_request.id }.ToBytes()//Every event has a pointer to its parent event
-                                            , ev.GetType().Name));
+                                    events.Select(ev=> ev.ToRawEvent(response.raw_request.id));
 
                                 RecordedRawEvent input_raw_event;
 
@@ -79,10 +76,7 @@ namespace LbspSOA
                             is_error: errors => {
 
                                 var payload =
-                                    errors.Select(ev => new RawEvent(Guid.NewGuid()
-                                            , ev.ToBytes()
-                                            , new { parent_id = response.raw_request.id }.ToBytes()//Every event has a pointer to its parent event
-                                            , ev.GetType().Name));
+                                    errors.Select(ev => ev.ToRawEvent(response.raw_request.id));
 
                                 RecordedRawEvent input_raw_event;
 

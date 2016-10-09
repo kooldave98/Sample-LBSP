@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using LbspSOA;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
@@ -24,7 +23,7 @@ namespace Registration.UnitTesting
         [TestMethod]
         public void deserialise_trigger()
         {
-            var trigger = new RegisterParkingHost(Guid.NewGuid(), "kooldave98", "kooldave98@hotmail.com");
+            var trigger = new RegisterParkingHost("kooldave98", "kooldave98@hotmail.com");
 
             var as_json = JsonConvert.SerializeObject(trigger);
 
@@ -57,7 +56,7 @@ namespace Registration.UnitTesting
 
         private Request<RegistrationWorld, RegisterParkingHost> new_request()
         {
-            var trigger = new RegisterParkingHost(Guid.NewGuid(), "kooldave98", "kooldave98@hotmail.com");
+            var trigger = new RegisterParkingHost("kooldave98", "kooldave98@hotmail.com");
             
             return new Request<RegistrationWorld, RegisterParkingHost>(RegistrationWorld.seed_world(), trigger);
         }
