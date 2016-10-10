@@ -63,7 +63,6 @@
   <ItemGroup>
     <Compile Include="DomainBehavior.cs" />
     <Compile Include="EventStore.cs" />
-    <Compile Include="IEventStore.cs" />
     <Compile Include="Router.cs" />
     <Compile Include="ITrigger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

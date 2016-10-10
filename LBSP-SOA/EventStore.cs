@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 
 namespace LbspSOA
 {
-    public class GESEventStore : IEventStore
+    public class EventStore
     {
         private const string LoggedEventPointer = "LoggedEventPointer";
 
@@ -28,18 +28,16 @@ namespace LbspSOA
         private ConcurrentDictionary<Guid, byte> received_request_ids = new ConcurrentDictionary<Guid, byte>();
         private ConcurrentDictionary<Guid, byte> processed_request_ids = new ConcurrentDictionary<Guid, byte>();
 
+        private Subject<RecordedRawEvent> combined_new_subject = new Subject<RecordedRawEvent>();
         public IObservable<RecordedRawEvent> NewEvents(params string[] stream_names)
         {
-            var new_subject = new Subject<RecordedRawEvent>();
-
             foreach (var stream in stream_names)
             {
-                NewEvents(stream, new_subject);
+                NewEvents(stream, combined_new_subject);
             }
 
-            return new_subject.AsObservable();
+            return combined_new_subject.AsObservable();
         }
-
         public IObservable<RecordedRawEvent> NewEvents(string stream_name, Subject<RecordedRawEvent> new_subject = null)
         {
             new_subject = new_subject ?? new Subject<RecordedRawEvent>();
@@ -47,8 +45,6 @@ namespace LbspSOA
             connection.SubscribeToStreamAsync(stream_name, true,
                 (e, s) =>
                 {
-                    
-                    //received_request_ids.AddOrUpdate(s.Event.EventId, default(byte), (g, b) => b);
 
                     var recorded_event = new RecordedRawEvent(new RawEvent(s.Event.EventId,
                                                                             s.Event.Data,
@@ -70,6 +66,17 @@ namespace LbspSOA
             return new_subject.AsObservable();
         }
 
+
+        private Subject<RecordedRawEvent> combined_all_unprocessed_subject = new Subject<RecordedRawEvent>();
+        public IObservable<RecordedRawEvent> AllUnprocessedEvents(params string[] stream_names)
+        {
+            foreach (var stream in stream_names)
+            {
+                AllUnprocessedEvents(stream, combined_all_unprocessed_subject);
+            }
+
+            return combined_all_unprocessed_subject.AsObservable();
+        }
         public IObservable<RecordedRawEvent> AllUnprocessedEvents(string stream_name, Subject<RecordedRawEvent> allUnprocessedSubject = null)
         {
             allUnprocessedSubject = allUnprocessedSubject ?? new Subject<RecordedRawEvent>();
@@ -85,6 +92,7 @@ namespace LbspSOA
                         &&
                         !s.Event.EventType.Contains(LoggedEventPointer))
                     {
+                        received_request_ids.AddOrUpdate(s.Event.EventId, default(byte), (g, b) => b);
 
                         var recorded_event =
                             new RecordedRawEvent(new RawEvent(s.Event.EventId,
@@ -93,12 +101,9 @@ namespace LbspSOA
                                                                 s.Event.EventType),
                                                     stream_name,
                                                     s.Event.EventNumber);
-
-
-                        received_request_ids.AddOrUpdate(s.Event.EventId, default(byte), (g, b) => b);
+                        
 
                         allUnprocessedSubject.OnNext(recorded_event);
-
                     }
 
                 }, null,
@@ -235,20 +240,20 @@ namespace LbspSOA
 
         private Dictionary<Guid, byte> get_latest_idempotency_values()
         {
-            var raw_json = 
+            var raw_json =
                 read_log(current_domain_stream, ReadDirection.Backward, 2)
                     .Where(e => e.Event.EventType.StartsWith(LoggedEventPointer))
                     .Select(e => e.Event.Metadata.ToJsonString())
                     .FirstOrDefault();
 
             return (
-                raw_json == null ? 
-                new ProcessedRequestIdsWrapper() : 
+                raw_json == null ?
+                new ProcessedRequestIdsWrapper() :
                 JsonConvert.DeserializeObject<ProcessedRequestIdsWrapper>(raw_json)
                 ).processed_request_ids;
         }
 
-        public GESEventStore(string permanent_world_name)
+        public EventStore(string permanent_world_name)
         {
             this.current_domain_stream = permanent_world_name;
 
@@ -276,5 +281,104 @@ namespace LbspSOA
     {
         public Dictionary<Guid, byte> processed_request_ids { get; set; } = new Dictionary<Guid, byte>();
     }
+    public class RecordedRawEvent
+    {
+        public readonly string origin_stream;
+        public readonly int position_in_stream;
+        public readonly RawEvent raw_event;
 
+        public RecordedRawEvent(RawEvent raw_event,
+                                string origin_stream,
+                                int position_in_stream)
+        {
+            this.raw_event = raw_event;
+            this.origin_stream = origin_stream;
+            this.position_in_stream = position_in_stream;
+        }
+
+        public RecordedRawEventPointer ToPointer()
+        {
+            if (string.IsNullOrWhiteSpace(this.origin_stream)) throw new InvalidOperationException("origin stream is empty");
+            if (this.position_in_stream < 0) throw new InvalidOperationException("position is invalid");
+
+
+            return new RecordedRawEventPointer(this.origin_stream, this.position_in_stream);
+        }
+    }
+
+    public static class RawEventExtensions
+    {
+        public static byte[] ToBytes(this object source)
+        {
+            return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(source));
+        }
+
+        public static string ToJsonString(this byte[] bytes_data)
+        {
+            return Encoding.UTF8.GetString(bytes_data);
+        }
+
+        public static T To<T>(this string json_string)
+        {
+            return JsonConvert.DeserializeObject<T>(json_string);
+        }
+
+        public static T To<T>(this byte[] bytes_data)
+        {
+            return To<T>(bytes_data.ToJsonString());
+        }
+
+        public static T ToAnonType<T>(this byte[] bytes_data, T t_object)
+        {
+            return ToAnonType(bytes_data.ToJsonString(), t_object);
+        }
+
+        public static T ToAnonType<T>(this string json_string, T t_object)
+        {
+            return JsonConvert.DeserializeAnonymousType(json_string, t_object);
+        }
+
+        public static object To(this string json_string, Type target_type)
+        {            
+            return JsonConvert.DeserializeObject(json_string, target_type);
+        }
+
+        public static object To(this byte[] bytes_data, Type target_type)
+        {
+            return To(bytes_data.ToJsonString(), target_type);
+        }
+    }
+
+
+    public class RawEvent
+    {
+        public readonly Guid id;
+        public readonly byte[] data;
+        public readonly byte[] metadata;
+        public readonly string type;
+
+        public RawEvent(Guid id,
+                        byte[] data,
+                        byte[] metadata,
+                        string type)
+        {
+            this.id = id;
+            this.data = data;
+            this.metadata = metadata;
+            this.type = type;
+        }
+    }
+
+    public class RecordedRawEventPointer
+    {
+        public string stream_name { get; set; }
+
+        public int position { get; set; }
+
+        public RecordedRawEventPointer(string stream_name, int position)
+        {
+            this.stream_name = stream_name;
+            this.position = position;
+        }
+    }
 }

@@ -10,9 +10,9 @@ namespace Registration.Interface
         public readonly string username;
         public readonly string email;
 
-        public RegisterParkingHost(string username, string email)
+        public RegisterParkingHost(string username, string email, Guid host_id = default(Guid))
         {
-            this.host_id = Guid.NewGuid();
+            this.host_id = host_id == default(Guid) ? Guid.NewGuid() : host_id;
             this.username = Guard.IsNotNull(username, nameof(username));
             this.email = Guard.IsNotNull(email, nameof(email));
         }

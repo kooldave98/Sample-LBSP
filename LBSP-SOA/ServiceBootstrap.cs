@@ -22,7 +22,7 @@ namespace LbspSOA
             request_handler =
                 new RequestHandler<W>(request_queue,
                                                     response_queue,
-                                                    new GESEventStore(context_name));
+                                                    new EventStore(context_name));
         }
 
         public ServiceBootstrap<W> replay()

@@ -8,21 +8,25 @@ using System.Reactive.Linq;
 
 namespace Gateway.Controllers
 {
+    /*
+     *                                          ==Todo==
+     * 1. SynchronousCommandBuilder: To hide in an abstraction the internals of publishing and waiting, and timeout
+     * 2. remember to conserve resources /avoid memory leaks => event_store.unsubscribe_all();
+     * 3. Need to handle case when ===> No handler defined for event with id
+     */
     public class RegisterParkingHostController : ApiController
-    {
+    {        
+        private EventStore event_store = new EventStore(Gateway.Interface.NameService.ContextName);
+
         [Route("api/register-parking-host")]
         public async Task<string> Post(RegisterParkingHost trigger)
         {
-            var response = await send(trigger);
-
-            //Need to handle case when ===>
-            //No handler defined for event with id
+            var response = await send(trigger);            
 
             if (response)
             {
                 return "success";
             }
-
 
             return "an error occurred";
         }
@@ -31,44 +35,24 @@ namespace Gateway.Controllers
         {
             var trigger_as_raw_event = trigger.ToRawEvent();
 
-
-            var event_store = new GESEventStore(Gateway.Interface.NameService.ContextName);
-            //remember to conserve resources /avoid memory leaks 
-            //=> event_store.unsubscribe_all();
-
             var tcs = new TaskCompletionSource<bool>();
 
             event_store
-                .NewEvents(Query.Interface.NameService.ContextName)
-                //.Where(re => re.raw_event.metadata.ToAnonType(new { parent_id = Guid.NewGuid()}).parent_id == trigger_as_raw_event.id)
+                .NewEvents(Query.Interface.NameService.ContextName, $"{Gateway.Interface.NameService.ContextName}-Errors")
                 .Subscribe(re => {
-
-                    var metadata =
-                    re.raw_event.metadata.ToAnonType(new { parent_id = Guid.NewGuid() });
-                    
-                    if(metadata.parent_id == trigger_as_raw_event.id)
-                    {
-                        var po = 3;
-                    }
 
                     if (re.raw_event.type == nameof(ParkingHostMaterialised) &&
                         re.raw_event.data.To<ParkingHostMaterialised>().host_id == trigger.host_id)
                     {
                         tcs.TrySetResult(true);
                     }
-                    
+
+                    if (re.origin_stream == $"{Gateway.Interface.NameService.ContextName}-Errors")
+                    {
+                        tcs.TrySetResult(false);
+                    }
+
                 });
-
-            //event_store
-            //    .NewEvents($"{Gateway.Interface.NameService.ContextName}-Errors")
-            //    .Where(re => re.raw_event.metadata.ToAnonType(new { parent_id = Guid.NewGuid() }).parent_id == trigger_as_raw_event.id)
-            //    .Subscribe(re => {
-
-                    
-            //        tcs.TrySetResult(false);
-                    
-
-            //    });
 
             event_store.Publish(trigger_as_raw_event);
 
@@ -76,21 +60,3 @@ namespace Gateway.Controllers
         }
     }
 }
-
-/*
-event_store
-                .NewEvents(Query.Interface.NameService.ContextName, $"{Gateway.Interface.NameService.ContextName}-Errors")
-                .Where(re => re.raw_event.metadata.ToAnonType(new { parent_id = Guid.NewGuid()}).parent_id == trigger_as_raw_event.id)
-                .Subscribe(re => {
-
-                    if(re.raw_event.type == nameof(ParkingHostMaterialised) &&
-                        re.raw_event.data.To<ParkingHostMaterialised>().host_id == trigger.host_id)
-                    {
-                        tcs.TrySetResult(true);
-                    }else
-                    {
-                        tcs.TrySetResult(false);
-                    }
-                    
-                }); 
-*/
