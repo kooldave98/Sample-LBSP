@@ -42,6 +42,17 @@
   <ItemGroup>
     <Compile Include="NameService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StartParkingSession.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CodeStructures\CodeStructures.csproj">
+      <Project>{1A5B7952-3781-4ECC-9443-5F32A68DA82D}</Project>
+      <Name>CodeStructures</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LBSP-SOA\LBSP-SOA.csproj">
+      <Project>{62159671-3A0D-4516-B326-55B1193950E1}</Project>
+      <Name>LBSP-SOA</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

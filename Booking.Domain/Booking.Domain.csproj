@@ -32,6 +32,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.Entity" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -42,8 +43,13 @@
   <ItemGroup>
     <Compile Include="BookingWorld.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WillStartParkingSession.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Booking.Interface\Booking.Interface.csproj">
+      <Project>{EA7019A4-1561-4FF9-9F74-687C6B2195D2}</Project>
+      <Name>Booking.Interface</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CodeStructures\CodeStructures.csproj">
       <Project>{1A5B7952-3781-4ECC-9443-5F32A68DA82D}</Project>
       <Name>CodeStructures</Name>

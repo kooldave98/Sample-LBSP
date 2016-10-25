@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Booking.Domain;
+using LbspSOA;
 
 namespace Booking.Service
 {
@@ -10,6 +7,13 @@ namespace Booking.Service
     {
         static void Main(string[] args)
         {
+            var context_name = Booking.Interface.NameService.ContextName;
+            var seed_world = BookingWorld.seed_world();
+
+            new ServiceBootstrap<BookingWorld>(context_name, seed_world)
+                .replay()
+                .listen_to(Gateway.Interface.NameService.ContextName)
+                .StartService();
         }
     }
 }

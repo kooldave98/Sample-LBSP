@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Spatial;
 using System.Linq;
 using CodeStructures;
 using LbspSOA;
@@ -17,8 +18,8 @@ namespace Booking.Domain
 {
     public class BookingWorld : IWorld
     {
-        public readonly IEnumerable<ParkingSpot> spots;
-        public readonly IEnumerable<ParkingGuest> guests;
+        public readonly IEnumerable<ParkingSpot> known_spots;
+        public readonly IEnumerable<ParkingGuest> known_guests;
         public readonly IEnumerable<LiveSession> liveSessions;
         public readonly IEnumerable<CompletedSession> completedSessions;
 
@@ -28,8 +29,8 @@ namespace Booking.Domain
                             IEnumerable<LiveSession> liveSessions, 
                             IEnumerable<CompletedSession> completedSessions)
         {
-            this.spots = Guard.IsNotNull(spots, nameof(spots));
-            this.guests = Guard.IsNotNull(guests, nameof(guests));
+            this.known_spots = Guard.IsNotNull(spots, nameof(spots));
+            this.known_guests = Guard.IsNotNull(guests, nameof(guests));
             this.liveSessions = Guard.IsNotNull(liveSessions, nameof(liveSessions));
             this.completedSessions = Guard.IsNotNull(completedSessions, nameof(completedSessions));
         }
@@ -75,12 +76,16 @@ namespace Booking.Domain
 
     public class ParkingSpot
     {
-        public readonly Guid host_id;
+        public readonly Guid spot_id;        
+        public readonly DbGeography location;
         //location
+        public readonly Guid host_id;
 
-        public ParkingSpot(Guid host_id)
+        public ParkingSpot(Guid spot_id, Guid host_id, DbGeography location)
         {
+            this.spot_id = Guard.IsNotNull(spot_id, nameof(spot_id));
             this.host_id = Guard.IsNotNull(host_id, nameof(host_id));
+            this.location = Guard.IsNotNull(location, nameof(location));
         }
     }
 
